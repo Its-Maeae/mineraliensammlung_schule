@@ -35,6 +35,7 @@ export default function Home() {
     location: '',
     description: ''
   });
+  const [vitrineImage, setVitrineImage] = useState<File | null>(null);
   const [showMineralModal, setShowMineralModal] = useState(false);
   const [showShowcaseModal, setShowShowcaseModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -129,12 +130,19 @@ const handleVitrineSubmit = async (e: React.FormEvent) => {
   setLoading(true);
 
   try {
+    const formData = new FormData();
+    formData.append('name', vitrineFormData.name);
+    formData.append('code', vitrineFormData.code);
+    formData.append('location', vitrineFormData.location);
+    formData.append('description', vitrineFormData.description);
+    
+    if (vitrineImage) {
+      formData.append('image', vitrineImage);
+    }
+
     const response = await fetch('/api/showcases', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(vitrineFormData)
+      body: formData
     });
 
     if (response.ok) {
@@ -144,9 +152,10 @@ const handleVitrineSubmit = async (e: React.FormEvent) => {
         location: '',
         description: ''
       });
+      setVitrineImage(null);
       setShowVitrineForm(false);
-      loadShowcases(); // Vitrinen neu laden
-      loadStats(); // Statistiken aktualisieren
+      loadShowcases();
+      loadStats();
       alert('Vitrine erfolgreich hinzugefügt!');
     } else {
       const error = await response.text();
@@ -806,7 +815,10 @@ const handleVitrineSubmit = async (e: React.FormEvent) => {
       {showVitrineForm && (
         <div className="modal" style={{ display: 'flex' }}>
           <div className="modal-content">
-            <span className="close-button" onClick={() => setShowVitrineForm(false)}>&times;</span>
+            <span className="close-button" onClick={() => {
+              setShowVitrineForm(false);
+              setVitrineImage(null);
+            }}>&times;</span>
             <h2>Neue Vitrine hinzufügen</h2>
             
             <form onSubmit={handleVitrineSubmit}>
@@ -856,11 +868,29 @@ const handleVitrineSubmit = async (e: React.FormEvent) => {
                 />
               </div>
 
+              <div className="form-group">
+                <label htmlFor="vitrine-image">Bild der Vitrine</label>
+                <input
+                  type="file"
+                  id="vitrine-image"
+                  accept="image/*"
+                  onChange={(e) => setVitrineImage(e.target.files?.[0] || null)}
+                />
+                {vitrineImage && (
+                  <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--gray-600)' }}>
+                    Ausgewählt: {vitrineImage.name}
+                  </div>
+                )}
+              </div>
+
               <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'flex-end', marginTop: 'var(--space-6)' }}>
                 <button 
                   type="button" 
                   className="btn btn-secondary"
-                  onClick={() => setShowVitrineForm(false)}
+                  onClick={() => {
+                    setShowVitrineForm(false);
+                    setVitrineImage(null);
+                  }}
                 >
                   Abbrechen
                 </button>
