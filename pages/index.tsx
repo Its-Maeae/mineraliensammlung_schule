@@ -28,6 +28,13 @@ export default function Home() {
   const [password, setPassword] = useState('');
   const [selectedMineral, setSelectedMineral] = useState<Mineral | null>(null);
   const [selectedShowcase, setSelectedShowcase] = useState<Showcase | null>(null);
+  const [showVitrineForm, setShowVitrineForm] = useState(false);
+  const [vitrineFormData, setVitrineFormData] = useState({
+    name: '',
+    code: '',
+    location: '',
+    description: ''
+  });
   const [showMineralModal, setShowMineralModal] = useState(false);
   const [showShowcaseModal, setShowShowcaseModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -114,6 +121,42 @@ export default function Home() {
     }
   } catch (error) {
     console.error('Fehler beim Laden der Vitrine-Details:', error);
+  }
+};
+
+const handleVitrineSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const response = await fetch('/api/showcases', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(vitrineFormData)
+    });
+
+    if (response.ok) {
+      setVitrineFormData({
+        name: '',
+        code: '',
+        location: '',
+        description: ''
+      });
+      setShowVitrineForm(false);
+      loadShowcases(); // Vitrinen neu laden
+      loadStats(); // Statistiken aktualisieren
+      alert('Vitrine erfolgreich hinzugefügt!');
+    } else {
+      const error = await response.text();
+      alert('Fehler: ' + error);
+    }
+  } catch (error) {
+    console.error('Fehler beim Hinzufügen der Vitrine:', error);
+    alert('Fehler beim Hinzufügen der Vitrine');
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -525,8 +568,10 @@ export default function Home() {
                     <p className="page-description">Organisieren Sie Ihre Sammlung in thematischen Vitrinen</p>
                   </div>
                   {isAuthenticated && (
-                    <button className="btn btn-primary">
-                      Neue Vitrine hinzufügen
+                    <button 
+                      className="btn btn-primary"
+                      onClick={() => setShowVitrineForm(true)}>
+                        Neue Vitrine hinzufügen
                     </button>
                   )}
                 </div>
@@ -753,6 +798,81 @@ export default function Home() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Vitrine Form Modal */}
+      {showVitrineForm && (
+        <div className="modal" style={{ display: 'flex' }}>
+          <div className="modal-content">
+            <span className="close-button" onClick={() => setShowVitrineForm(false)}>&times;</span>
+            <h2>Neue Vitrine hinzufügen</h2>
+            
+            <form onSubmit={handleVitrineSubmit}>
+              <div className="form-group">
+                <label htmlFor="vitrine-name">Name der Vitrine</label>
+                <input
+                  type="text"
+                  id="vitrine-name"
+                  value={vitrineFormData.name}
+                  onChange={(e) => setVitrineFormData({...vitrineFormData, name: e.target.value})}
+                  placeholder="z.B. Hauptsammlung, Edelsteine, Kristalle"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="vitrine-code">Vitrine-Code</label>
+                <input
+                  type="text"
+                  id="vitrine-code"
+                  value={vitrineFormData.code}
+                  onChange={(e) => setVitrineFormData({...vitrineFormData, code: e.target.value})}
+                  placeholder="z.B. V1, HAUPT, EDL"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="vitrine-location">Standort</label>
+                <input
+                  type="text"
+                  id="vitrine-location"
+                  value={vitrineFormData.location}
+                  onChange={(e) => setVitrineFormData({...vitrineFormData, location: e.target.value})}
+                  placeholder="z.B. Wohnzimmer, Keller, Arbeitszimmer"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="vitrine-description">Beschreibung</label>
+                <textarea
+                  id="vitrine-description"
+                  value={vitrineFormData.description}
+                  onChange={(e) => setVitrineFormData({...vitrineFormData, description: e.target.value})}
+                  placeholder="Beschreibung der Vitrine, Thema, Besonderheiten..."
+                  rows={4}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'flex-end', marginTop: 'var(--space-6)' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => setShowVitrineForm(false)}
+                >
+                  Abbrechen
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? 'Wird hinzugefügt...' : 'Vitrine hinzufügen'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -1768,6 +1888,20 @@ export default function Home() {
           font-size: inherit;
         }
 
+        .form-group textarea {
+          min-height: 100px;
+          resize: vertical;
+          font-family: inherit;
+        }
+
+        .modal-content form {
+          width: 100%;
+        }
+
+        .form-group {
+          margin-bottom: var(--space-4);
+        }
+
         /* Mobile Styles */
         @media (max-width: 768px) {
           .mobile-menu-toggle {
@@ -1985,6 +2119,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
       setLoading(false);
     }
   };
+  
 
   return (
     <form onSubmit={handleSubmit}>
