@@ -1,5 +1,32 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { parse } from 'cookie';
 import database from '../../../lib/database';
+
+// Authentifizierungsfunktion
+function checkAuthentication(req: NextApiRequest): boolean {
+  try {
+    const cookies = parse(req.headers.cookie || '');
+    const sessionToken = cookies.admin_session;
+
+    if (!sessionToken || !sessionToken.startsWith('authenticated-')) {
+      return false;
+    }
+
+    // Token-Validierung (gleiche Logik wie in checks.ts)
+    const tokenTimestamp = parseInt(sessionToken.split('-')[1]);
+    const now = Date.now();
+    const maxAge = 24 * 60 * 60 * 1000; // 24 Stunden
+
+    if (now - tokenTimestamp > maxAge) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Authentifizierungsfehler:', error);
+    return false;
+  }
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -30,12 +57,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'PUT') {
     try {
-      // Authentifizierung prüfen
-      const authResponse = await fetch(`${req.headers.origin}/api/auth/check`, {
-        headers: { cookie: req.headers.cookie || '' }
-      });
-      
-      if (!authResponse.ok) {
+      // Direkte Authentifizierungsprüfung
+      if (!checkAuthentication(req)) {
         return res.status(401).json({ error: 'Nicht authentifiziert' });
       }
 
@@ -85,12 +108,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'DELETE') {
     try {
-      // Authentifizierung prüfen
-      const authResponse = await fetch(`${req.headers.origin}/api/auth/check`, {
-        headers: { cookie: req.headers.cookie || '' }
-      });
-      
-      if (!authResponse.ok) {
+      // Direkte Authentifizierungsprüfung
+      if (!checkAuthentication(req)) {
         return res.status(401).json({ error: 'Nicht authentifiziert' });
       }
 
