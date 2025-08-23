@@ -47,6 +47,9 @@ export default function Home() {
     position_order: 0
   });
   const [shelfImage, setShelfImage] = useState<File | null>(null);
+  const [showShelfMineralsModal, setShowShelfMineralsModal] = useState(false);
+  const [selectedShelf, setSelectedShelf] = useState<any>(null);
+  const [shelfMinerals, setShelfMinerals] = useState<Mineral[]>([]);
 
   useEffect(() => {
     loadStats();
@@ -218,6 +221,23 @@ const handleShelfSubmit = async (e: React.FormEvent) => {
   } catch (error) {
     console.error('Fehler beim Hinzufügen des Regals:', error);
     alert('Fehler beim Hinzufügen des Regals');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const openShelfDetails = async (shelfId: number) => {
+  try {
+    setLoading(true);
+    const response = await fetch(`/api/shelves/${shelfId}/minerals`);
+    if (response.ok) {
+      const data = await response.json();
+      setSelectedShelf(data.shelfInfo);
+      setShelfMinerals(data.minerals);
+      setShowShelfMineralsModal(true);
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden der Regal-Details:', error);
   } finally {
     setLoading(false);
   }
@@ -855,7 +875,16 @@ const handleShelfSubmit = async (e: React.FormEvent) => {
                 <h3>Regale in dieser Vitrine</h3>
                 <div className="shelves-grid">
                   {selectedShowcase.shelves.map((shelf: any) => (
-                    <div key={shelf.id} className="shelf-card">
+                    <div 
+                      key={shelf.id} 
+                      className="shelf-card clickable"
+                      onClick={() => openShelfDetails(shelf.id)}
+                    >
+                      {shelf.image_path && (
+                        <div className="shelf-image">
+                          <img src={`/uploads/${shelf.image_path}`} alt={shelf.name} />
+                        </div>
+                      )}
                       <div className="shelf-info">
                         <h4>{shelf.name}</h4>
                         <p><strong>Code:</strong> {shelf.full_code}</p>
@@ -867,6 +896,64 @@ const handleShelfSubmit = async (e: React.FormEvent) => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Shelf Minerals Modal */}
+      {showShelfMineralsModal && selectedShelf && (
+        <div className="modal" style={{ display: 'flex' }}>
+          <div className="modal-content shelf-minerals-modal">
+            <span className="close-button" onClick={() => setShowShelfMineralsModal(false)}>&times;</span>
+            <h2>Regal: {selectedShelf.shelf_name}</h2>
+            <p style={{ color: 'var(--gray-600)', marginBottom: 'var(--space-6)' }}>
+              {selectedShelf.showcase_name} - {selectedShelf.full_code}
+            </p>
+            
+            {selectedShelf.image_path && (
+              <div className="detail-image" style={{ marginBottom: 'var(--space-6)' }}>
+                <img src={`/uploads/${selectedShelf.image_path}`} alt={selectedShelf.shelf_name} />
+              </div>
+            )}
+            
+            <h3 style={{ marginBottom: 'var(--space-4)' }}>
+              Mineralien in diesem Regal ({shelfMinerals.length})
+            </h3>
+            
+            {loading ? (
+              <div className="loading">Lade Mineralien...</div>
+            ) : shelfMinerals.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--gray-500)' }}>
+                <p>🗳️ Dieses Regal ist noch leer</p>
+                <p>Keine Mineralien zugeordnet</p>
+              </div>
+            ) : (
+              <div className="shelf-minerals-grid">
+                {shelfMinerals.map(mineral => (
+                  <div 
+                    key={mineral.id} 
+                    className="mineral-card-small" 
+                    onClick={() => {
+                      setShowShelfMineralsModal(false);
+                      openMineralDetails(mineral.id);
+                    }}
+                  >
+                    <div className="mineral-image-small">
+                      {mineral.image_path ? (
+                        <img src={`/uploads/${mineral.image_path}`} alt={mineral.name} />
+                      ) : (
+                        <div className="placeholder">📸</div>
+                      )}
+                    </div>
+                    <div className="mineral-info-small">
+                      <h4>{mineral.name}</h4>
+                      <p><strong>Nr:</strong> {mineral.number}</p>
+                      <p><strong>Farbe:</strong> {mineral.color || 'Nicht angegeben'}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -2096,6 +2183,144 @@ const handleShelfSubmit = async (e: React.FormEvent) => {
 
         .form-group {
           margin-bottom: var(--space-4);
+        }
+
+        .shelf-card.clickable {
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .shelf-card.clickable:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .shelf-image {
+          width: 100%;
+          height: 120px;
+          background: linear-gradient(135deg, var(--gray-400), var(--gray-500));
+          border-radius: var(--radius-md);
+          overflow: hidden;
+          margin-bottom: var(--space-3);
+        }
+
+        .shelf-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform var(--transition-normal);
+        }
+
+        .shelf-card.clickable:hover .shelf-image img {
+          transform: scale(1.05);
+        }
+
+        .shelf-minerals-modal .modal-content {
+          max-width: 1000px;
+          max-height: 90vh;
+        }
+
+        .shelf-minerals-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: var(--space-4);
+          max-height: 60vh;
+          overflow-y: auto;
+          padding: var(--space-2);
+        }
+
+        .mineral-card-small {
+          background: var(--white);
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--gray-200);
+          transition: all var(--transition-normal);
+          cursor: pointer;
+          display: flex;
+          gap: var(--space-3);
+          padding: var(--space-3);
+        }
+
+        .mineral-card-small:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+          border-color: var(--primary-color);
+        }
+
+        .mineral-image-small {
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+          border-radius: var(--radius-md);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          color: var(--white);
+          flex-shrink: 0;
+          overflow: hidden;
+        }
+
+        .mineral-image-small img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform var(--transition-normal);
+        }
+
+        .mineral-card-small:hover .mineral-image-small img {
+          transform: scale(1.1);
+        }
+
+        .mineral-info-small {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .mineral-info-small h4 {
+          font-size: var(--font-size-base);
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-2);
+          line-height: 1.2;
+        }
+
+        .mineral-info-small p {
+          font-size: var(--font-size-sm);
+          color: var(--gray-600);
+          margin-bottom: var(--space-1);
+          line-height: 1.3;
+        }
+
+        .mineral-info-small p strong {
+          color: var(--gray-800);
+          font-weight: 600;
+        }
+
+        /* Mobile Anpassungen */
+        @media (max-width: 768px) {
+          .shelf-minerals-modal .modal-content {
+            margin: var(--space-2);
+            max-height: calc(100vh - 1rem);
+          }
+          
+          .shelf-minerals-grid {
+            grid-template-columns: 1fr;
+            max-height: 50vh;
+          }
+          
+          .mineral-card-small {
+            padding: var(--space-2);
+            gap: var(--space-2);
+          }
+          
+          .mineral-image-small {
+            width: 60px;
+            height: 60px;
+          }
         }
 
         /* Mobile Styles */
