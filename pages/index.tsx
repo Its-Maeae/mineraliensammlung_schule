@@ -104,6 +104,19 @@ export default function Home() {
     }
   };
 
+  const openShowcaseDetails = async (id: number) => {
+  try {
+    const response = await fetch(`/api/showcases/${id}`);
+    if (response.ok) {
+      const showcase = await response.json();
+      setSelectedShowcase(showcase);
+      setShowShowcaseModal(true);
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden der Vitrine-Details:', error);
+  }
+};
+
   useEffect(() => {
     if (currentPage === 'collection') {
       loadMinerals();
@@ -532,10 +545,7 @@ export default function Home() {
                     <div 
                       key={showcase.id} 
                       className="vitrine-card"
-                      onClick={() => {
-                        setSelectedShowcase(showcase);
-                        setShowShowcaseModal(true);
-                      }}
+                      onClick={() => openShowcaseDetails(showcase.id)}
                     >
                       <div className="vitrine-image">
                         {showcase.image_path ? (
@@ -672,6 +682,77 @@ export default function Home() {
                 {selectedMineral.description || 'Keine Beschreibung verfügbar.'}
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Showcase Details Modal */}
+      {showShowcaseModal && selectedShowcase && (
+        <div className="modal" style={{ display: 'flex' }}>
+          <div className="modal-content showcase-modal">
+            <span className="close-button" onClick={() => setShowShowcaseModal(false)}>&times;</span>
+            <h2>{selectedShowcase.name}</h2>
+            
+            {selectedShowcase.image_path && (
+              <div className="detail-image">
+                <img src={`/uploads/${selectedShowcase.image_path}`} alt={selectedShowcase.name} />
+              </div>
+            )}
+            
+            <div className="detail-info">
+              <div className="detail-item">
+                <span className="detail-label">Code:</span>
+                <span className="detail-value">{selectedShowcase.code}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Standort:</span>
+                <span className="detail-value">{selectedShowcase.location || 'Nicht angegeben'}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Anzahl Regale:</span>
+                <span className="detail-value">{selectedShowcase.shelf_count || 0}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Anzahl Mineralien:</span>
+                <span className="detail-value">{selectedShowcase.mineral_count || 0}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Hinzugefügt:</span>
+                <span className="detail-value">
+                  {new Date(selectedShowcase.created_at).toLocaleDateString('de-DE')}
+                </span>
+              </div>
+            </div>
+            
+            {selectedShowcase.description && (
+              <div style={{ marginTop: '20px' }}>
+                <h3>Beschreibung</h3>
+                <p style={{ marginTop: '10px', color: '#555', lineHeight: '1.6' }}>
+                  {selectedShowcase.description}
+                </p>
+              </div>
+            )}
+
+            {/* Regale der Vitrine anzeigen */}
+            {selectedShowcase.shelves && selectedShowcase.shelves.length > 0 && (
+              <div style={{ marginTop: '30px' }}>
+                <h3>Regale in dieser Vitrine</h3>
+                <div className="shelves-grid">
+                  {selectedShowcase.shelves.map((shelf: any) => (
+                    <div key={shelf.id} className="shelf-card">
+                      <div className="shelf-info">
+                        <h4>{shelf.name}</h4>
+                        <p><strong>Code:</strong> {shelf.full_code}</p>
+                        <p><strong>Mineralien:</strong> {shelf.mineral_count || 0}</p>
+                        {shelf.description && (
+                          <p><strong>Beschreibung:</strong> {shelf.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1757,6 +1838,50 @@ export default function Home() {
             grid-template-columns: 1fr;
             gap: var(--space-2);
           }
+        }
+
+        .showcase-modal .modal-content {
+          max-width: 800px;
+          max-height: 90vh;
+        }
+
+        .shelves-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: var(--space-4);
+          margin-top: var(--space-4);
+        }
+
+        .shelf-card {
+          background: var(--gray-50);
+          border: 1px solid var(--gray-200);
+          border-radius: var(--radius-lg);
+          padding: var(--space-4);
+          transition: all var(--transition-fast);
+        }
+
+        .shelf-card:hover {
+          background: var(--gray-100);
+          border-color: var(--primary-color);
+        }
+
+        .shelf-info h4 {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-2);
+        }
+
+        .shelf-info p {
+          font-size: var(--font-size-sm);
+          color: var(--gray-600);
+          margin-bottom: var(--space-1);
+          line-height: 1.4;
+        }
+
+        .shelf-info p strong {
+          color: var(--gray-800);
+          font-weight: 600;
         }
 
         @media (max-width: 480px) {

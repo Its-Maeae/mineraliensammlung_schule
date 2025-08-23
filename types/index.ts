@@ -24,6 +24,7 @@ export interface Showcase {
   created_at: string;
   shelf_count?: number;
   mineral_count?: number;
+  shelves?: Shelf[];
 }
 
 export interface Shelf {
