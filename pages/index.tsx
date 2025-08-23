@@ -39,6 +39,14 @@ export default function Home() {
   const [showMineralModal, setShowMineralModal] = useState(false);
   const [showShowcaseModal, setShowShowcaseModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showShelfForm, setShowShelfForm] = useState(false);
+  const [shelfFormData, setShelfFormData] = useState({
+    name: '',
+    code: '',
+    description: '',
+    position_order: 0
+  });
+  const [shelfImage, setShelfImage] = useState<File | null>(null);
 
   useEffect(() => {
     loadStats();
@@ -164,6 +172,52 @@ const handleVitrineSubmit = async (e: React.FormEvent) => {
   } catch (error) {
     console.error('Fehler beim Hinzufügen der Vitrine:', error);
     alert('Fehler beim Hinzufügen der Vitrine');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleShelfSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const formData = new FormData();
+    formData.append('name', shelfFormData.name);
+    formData.append('code', shelfFormData.code);
+    formData.append('description', shelfFormData.description);
+    formData.append('position_order', shelfFormData.position_order.toString());
+    formData.append('showcase_id', selectedShowcase!.id.toString());
+    
+    if (shelfImage) {
+      formData.append('image', shelfImage);
+    }
+
+    const response = await fetch('/api/shelves', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      setShelfFormData({
+        name: '',
+        code: '',
+        description: '',
+        position_order: 0
+      });
+      setShelfImage(null);
+      setShowShelfForm(false);
+      // Vitrine Details neu laden
+      openShowcaseDetails(selectedShowcase!.id);
+      loadStats();
+      alert('Regal erfolgreich hinzugefügt!');
+    } else {
+      const error = await response.text();
+      alert('Fehler: ' + error);
+    }
+  } catch (error) {
+    console.error('Fehler beim Hinzufügen des Regals:', error);
+    alert('Fehler beim Hinzufügen des Regals');
   } finally {
     setLoading(false);
   }
@@ -746,6 +800,14 @@ const handleVitrineSubmit = async (e: React.FormEvent) => {
           <div className="modal-content showcase-modal">
             <span className="close-button" onClick={() => setShowShowcaseModal(false)}>&times;</span>
             <h2>{selectedShowcase.name}</h2>
+            {isAuthenticated && (
+              <button 
+                className="btn btn-primary"
+                style={{ marginBottom: 'var(--space-4)' }}
+                onClick={() => setShowShelfForm(true)}>
+                  Neues Regal hinzufügen
+              </button>
+            )}
             
             {selectedShowcase.image_path && (
               <div className="detail-image">
@@ -900,6 +962,110 @@ const handleVitrineSubmit = async (e: React.FormEvent) => {
                   disabled={loading}
                 >
                   {loading ? 'Wird hinzugefügt...' : 'Vitrine hinzufügen'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+
+      {/* Shelf Form Modal */}
+      {showShelfForm && selectedShowcase && (
+        <div className="modal" style={{ display: 'flex' }}>
+          <div className="modal-content">
+            <span className="close-button" onClick={() => {
+              setShowShelfForm(false);
+              setShelfImage(null);
+            }}>&times;</span>
+            <h2>Neues Regal für {selectedShowcase.name} hinzufügen</h2>
+            
+            <form onSubmit={handleShelfSubmit}>
+              <div className="form-group">
+                <label htmlFor="shelf-name">Name des Regals</label>
+                <input
+                  type="text"
+                  id="shelf-name"
+                  value={shelfFormData.name}
+                  onChange={(e) => setShelfFormData({...shelfFormData, name: e.target.value})}
+                  placeholder="z.B. Oberes Regal, Edelsteine, Kristalle"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="shelf-code">Regal-Code</label>
+                <input
+                  type="text"
+                  id="shelf-code"
+                  value={shelfFormData.code}
+                  onChange={(e) => setShelfFormData({...shelfFormData, code: e.target.value})}
+                  placeholder="z.B. R1, OBER, EDL"
+                  required
+                />
+                <small style={{ color: 'var(--gray-600)', fontSize: 'var(--font-size-sm)' }}>
+                  Vollständiger Code wird: {selectedShowcase.code}-{shelfFormData.code}
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="shelf-description">Beschreibung</label>
+                <textarea
+                  id="shelf-description"
+                  value={shelfFormData.description}
+                  onChange={(e) => setShelfFormData({...shelfFormData, description: e.target.value})}
+                  placeholder="Beschreibung des Regals, Inhalt, Besonderheiten..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="shelf-position">Position/Reihenfolge</label>
+                <input
+                  type="number"
+                  id="shelf-position"
+                  value={shelfFormData.position_order}
+                  onChange={(e) => setShelfFormData({...shelfFormData, position_order: parseInt(e.target.value) || 0})}
+                  placeholder="0"
+                  min="0"
+                />
+                <small style={{ color: 'var(--gray-600)', fontSize: 'var(--font-size-sm)' }}>
+                  Bestimmt die Anzeigereihenfolge (0 = erstes Regal)
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="shelf-image">Bild des Regals</label>
+                <input
+                  type="file"
+                  id="shelf-image"
+                  accept="image/*"
+                  onChange={(e) => setShelfImage(e.target.files?.[0] || null)}
+                />
+                {shelfImage && (
+                  <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--gray-600)' }}>
+                    Ausgewählt: {shelfImage.name}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'flex-end', marginTop: 'var(--space-6)' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setShowShelfForm(false);
+                    setShelfImage(null);
+                  }}
+                >
+                  Abbrechen
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? 'Wird hinzugefügt...' : 'Regal hinzufügen'}
                 </button>
               </div>
             </form>

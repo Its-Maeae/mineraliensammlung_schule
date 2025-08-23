@@ -1,5 +1,72 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import database from '../../../lib/database';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { parse } from 'cookie';
+
+// Authentifizierungsfunktion hinzufügen
+function checkAuthentication(req: NextApiRequest): boolean {
+  try {
+    const cookies = parse(req.headers.cookie || '');
+    const sessionToken = cookies.admin_session;
+
+    if (!sessionToken || !sessionToken.startsWith('authenticated-')) {
+      return false;
+    }
+
+    const tokenTimestamp = parseInt(sessionToken.split('-')[1]);
+    const now = Date.now();
+    const maxAge = 24 * 60 * 60 * 1000; // 24 Stunden
+
+    if (now - tokenTimestamp > maxAge) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Authentifizierungsfehler:', error);
+    return false;
+  }
+}
+
+// Multer Konfiguration
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(process.cwd(), 'public/uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'shelf-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 40 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Nur Bilddateien sind erlaubt'));
+    }
+  }
+});
+
+function runMiddleware(req: any, res: any, fn: any) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -24,16 +91,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'POST') {
     try {
-      // Authentifizierung prüfen
-      const authResponse = await fetch(`${req.headers.origin}/api/auth/check`, {
-        headers: { cookie: req.headers.cookie || '' }
-      });
-      
-      if (!authResponse.ok) {
+      // Direkte Authentifizierungsprüfung
+      if (!checkAuthentication(req)) {
         return res.status(401).json({ error: 'Nicht authentifiziert' });
       }
 
-      const { name, code, showcase_id, description, position_order } = req.body;
+      // Multer Middleware ausführen
+      await runMiddleware(req, res, upload.single('image'));
+
+      const { name, code, showcase_id, description, position_order } = (req as any).body;
+      const image = (req as any).file;
 
       // Prüfen ob Code bereits in dieser Vitrine existiert
       const existingShelf = await database.get(
@@ -46,8 +113,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const result = await database.run(
-        'INSERT INTO shelves (name, code, showcase_id, description, position_order) VALUES (?, ?, ?, ?, ?)',
-        [name, code, showcase_id, description, position_order || 0]
+        'INSERT INTO shelves (name, code, showcase_id, description, position_order, image_path) VALUES (?, ?, ?, ?, ?, ?)',
+        [name, code, showcase_id, description, position_order || 0, image ? image.filename : null]
       );
 
       res.status(201).json({ id: result.id, message: 'Regal erfolgreich hinzugefügt' });
@@ -60,3 +127,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
