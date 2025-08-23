@@ -9,10 +9,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Regal-Informationen laden
       const shelfInfo = await database.get(`
         SELECT s.name as shelf_name,
-               s.code as shelf_code,
-               sc.name as showcase_name,
-               sc.code as showcase_code,
-               (sc.code || '-' || s.code) as full_code
+              s.code as shelf_code,
+              s.image_path,
+              s.description,
+              sc.name as showcase_name,
+              sc.code as showcase_code,
+              (sc.code || '-' || s.code) as full_code
         FROM shelves s
         LEFT JOIN showcases sc ON s.showcase_id = sc.id
         WHERE s.id = ?
