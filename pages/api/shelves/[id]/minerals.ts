@@ -8,10 +8,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       // Regal-Informationen laden
       const shelfInfo = await database.get(`
-        SELECT s.name as shelf_name,
-              s.code as shelf_code,
+        SELECT s.id,
+              s.name,
+              s.code,
               s.image_path,
               s.description,
+              s.position_order,
               sc.name as showcase_name,
               sc.code as showcase_code,
               (sc.code || '-' || s.code) as full_code

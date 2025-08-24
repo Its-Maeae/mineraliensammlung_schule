@@ -357,10 +357,10 @@ const handleEditShowcase = (showcase: Showcase) => {
 const handleEditShelf = (shelf: any) => {
   setEditFormData({
     id: shelf.id,
-    name: shelf.shelf_name,
-    code: shelf.shelf_code,
+    name: shelf.name,
+    code: shelf.code,
     description: shelf.description || '',
-    position_order: 0,
+    position_order: shelf.position_order || 0,
     showcase_id: selectedShowcase?.id
   });
   setEditMode('shelf');
