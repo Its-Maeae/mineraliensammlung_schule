@@ -50,6 +50,27 @@ export default function Home() {
   const [showShelfMineralsModal, setShowShelfMineralsModal] = useState(false);
   const [selectedShelf, setSelectedShelf] = useState<any>(null);
   const [shelfMinerals, setShelfMinerals] = useState<Mineral[]>([]);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  // Theme management
+  useEffect(() => {
+    // Load saved theme from localStorage or default to 'light'
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      // Default to light theme
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
 
   useEffect(() => {
     loadStats();
@@ -167,14 +188,14 @@ export default function Home() {
         setShowVitrineForm(false);
         loadShowcases();
         loadStats();
-        alert('Vitrine erfolgreich hinzugefÃ¼gt!');
+        alert('Vitrine erfolgreich hinzugefügt!');
       } else {
         const error = await response.text();
         alert('Fehler: ' + error);
       }
     } catch (error) {
-      console.error('Fehler beim HinzufÃ¼gen der Vitrine:', error);
-      alert('Fehler beim HinzufÃ¼gen der Vitrine');
+      console.error('Fehler beim Hinzufügen der Vitrine:', error);
+      alert('Fehler beim Hinzufügen der Vitrine');
     } finally {
       setLoading(false);
     }
@@ -212,14 +233,14 @@ export default function Home() {
         setShowShelfForm(false);
         openShowcaseDetails(selectedShowcase!.id);
         loadStats();
-        alert('Regal erfolgreich hinzugefÃ¼gt!');
+        alert('Regal erfolgreich hinzugefügt!');
       } else {
         const error = await response.text();
         alert('Fehler: ' + error);
       }
     } catch (error) {
-      console.error('Fehler beim HinzufÃ¼gen des Regals:', error);
-      alert('Fehler beim HinzufÃ¼gen des Regals');
+      console.error('Fehler beim Hinzufügen des Regals:', error);
+      alert('Fehler beim Hinzufügen des Regals');
     } finally {
       setLoading(false);
     }
@@ -359,6 +380,13 @@ export default function Home() {
               >
                 Verwaltung
               </a>
+              <button 
+                className="theme-toggle"
+                onClick={toggleTheme}
+                title={theme === 'light' ? 'Zu Dark Mode wechseln' : 'Zu Light Mode wechseln'}
+              >
+                {theme === 'light' ? '🌙' : '☀️'}
+              </button>
             </nav>
             
             <div 
@@ -379,6 +407,16 @@ export default function Home() {
         <a className="mobile-nav-link" onClick={() => showPage('vitrines')}>Vitrinen</a>
         <a className="mobile-nav-link" onClick={() => showPage('collection')}>Sammlung</a>
         <a className="mobile-nav-link" onClick={() => showPage('admin')}>Verwaltung</a>
+        <div style={{ padding: 'var(--space-4)', borderTop: '1px solid var(--gray-200)' }}>
+          <button 
+            className="theme-toggle"
+            onClick={toggleTheme}
+            style={{ width: '100%', justifyContent: 'center', fontSize: 'var(--font-size-base)' }}
+            title={theme === 'light' ? 'Zu Dark Mode wechseln' : 'Zu Light Mode wechseln'}
+          >
+            {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+          </button>
+        </div>
       </div>
 
       <main>
@@ -662,7 +700,7 @@ export default function Home() {
                   <div className="loading">Lade Vitrinen...</div>
                 ) : showcases.length === 0 ? (
                   <div className="no-showcases">
-                    <h3>🛏️ Noch keine Vitrinen vorhanden</h3>
+                    <h3>🛍️ Noch keine Vitrinen vorhanden</h3>
                     <p>Fügen Sie Ihre erste Vitrine hinzu, um Ihre Sammlung zu organisieren.</p>
                   </div>
                 ) : (
@@ -676,7 +714,7 @@ export default function Home() {
                         {showcase.image_path ? (
                           <img src={`/uploads/${showcase.image_path}`} alt={showcase.name} />
                         ) : (
-                          <div className="placeholder">🛏️</div>
+                          <div className="placeholder">🛍️</div>
                         )}
                       </div>
                       <div className="vitrine-info">
