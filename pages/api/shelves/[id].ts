@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { parse } from 'cookie';
 
-// Diese Funktion nach den anderen imports hinzufügen:
+// Authentifizierungsfunktion
 function checkAuthentication(req: NextApiRequest): boolean {
   try {
     const cookies = parse(req.headers.cookie || '');
@@ -30,7 +30,7 @@ function checkAuthentication(req: NextApiRequest): boolean {
   }
 }
 
-// Multer Konfiguration hinzufügen (gleiche wie oben)
+// Multer Konfiguration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(process.cwd(), 'public/uploads');
@@ -41,7 +41,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'showcase-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, 'shelf-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
@@ -73,89 +73,86 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
-      const showcase = await database.get(
-        'SELECT * FROM showcases WHERE id = ?',
-        [id]
-      );
-
-      if (!showcase) {
-        return res.status(404).json({ error: 'Vitrine nicht gefunden' });
-      }
-
-      // Regale dieser Vitrine laden
-      const shelves = await database.query(`
+      const shelf = await database.get(`
         SELECT s.*,
+               sc.name as showcase_name,
                sc.code as showcase_code,
-               (sc.code || '-' || s.code) as full_code,
-               COUNT(m.id) as mineral_count
+               (sc.code || '-' || s.code) as full_code
         FROM shelves s
         LEFT JOIN showcases sc ON s.showcase_id = sc.id
-        LEFT JOIN minerals m ON s.id = m.shelf_id
-        WHERE s.showcase_id = ?
-        GROUP BY s.id
-        ORDER BY s.position_order, s.name
+        WHERE s.id = ?
       `, [id]);
 
-      showcase.shelves = shelves;
+      if (!shelf) {
+        return res.status(404).json({ error: 'Regal nicht gefunden' });
+      }
 
-      res.status(200).json(showcase);
+      res.status(200).json(shelf);
     } catch (error) {
-      console.error('Fehler beim Laden der Vitrine:', error);
-      res.status(500).json({ error: 'Fehler beim Laden der Vitrine' });
+      console.error('Fehler beim Laden des Regals:', error);
+      res.status(500).json({ error: 'Fehler beim Laden des Regals' });
     }
   } else if (req.method === 'PUT') {
     try {
-      // Direkte Authentifizierungsprüfung statt Fetch
       if (!checkAuthentication(req)) {
         return res.status(401).json({ error: 'Nicht authentifiziert' });
       }
 
-      // ... Rest der PUT-Route wie oben beschrieben
+      // Multer Middleware für Bildupload
+      await runMiddleware(req, res, upload.single('image'));
+
+      const { name, code, description, position_order, showcase_id } = (req as any).body;
+      const image = (req as any).file;
+
+      // Prüfen ob Code bereits in der Vitrine existiert (außer beim aktuellen Regal)
+      const existingShelf = await database.get(
+        'SELECT id FROM shelves WHERE code = ? AND showcase_id = ? AND id != ?',
+        [code, showcase_id, id]
+      );
+
+      if (existingShelf) {
+        return res.status(400).json({ error: 'Regal-Code bereits in dieser Vitrine vorhanden' });
+      }
+
+      // SQL für Update mit oder ohne neues Bild
+      let sql = `UPDATE shelves SET name = ?, code = ?, description = ?, position_order = ?`;
+      let params = [name, code, description, position_order || 0];
+
+      if (image) {
+        sql += `, image_path = ?`;
+        params.push(image.filename);
+      }
+
+      sql += ` WHERE id = ?`;
+      params.push(id);
+
+      await database.run(sql, params);
+
+      res.status(200).json({ message: 'Regal erfolgreich aktualisiert' });
     } catch (error) {
-      console.error('Fehler beim Aktualisieren der Vitrine:', error);
-      res.status(500).json({ error: 'Fehler beim Aktualisieren der Vitrine' });
+      console.error('Fehler beim Aktualisieren des Regals:', error);
+      res.status(500).json({ error: 'Fehler beim Aktualisieren des Regals' });
     }
   } else if (req.method === 'DELETE') {
     try {
-      // Direkte Authentifizierungsprüfung statt Fetch
       if (!checkAuthentication(req)) {
         return res.status(401).json({ error: 'Nicht authentifiziert' });
       }
 
-      // Vitrine löschen (Regale werden durch CASCADE gelöscht)
-      const result = await database.run('DELETE FROM showcases WHERE id = ?', [id]);
+      // Erst alle Mineralien von diesem Regal entfernen (shelf_id auf NULL setzen)
+      await database.run('UPDATE minerals SET shelf_id = NULL WHERE shelf_id = ?', [id]);
+
+      // Dann das Regal löschen
+      const result = await database.run('DELETE FROM shelves WHERE id = ?', [id]);
 
       if (result.changes === 0) {
-        return res.status(404).json({ error: 'Vitrine nicht gefunden' });
+        return res.status(404).json({ error: 'Regal nicht gefunden' });
       }
 
-      res.status(200).json({ message: 'Vitrine erfolgreich gelöscht' });
+      res.status(200).json({ message: 'Regal erfolgreich gelöscht' });
     } catch (error) {
-      console.error('Fehler beim Löschen der Vitrine:', error);
-      res.status(500).json({ error: 'Fehler beim Löschen der Vitrine' });
-    }
-  } else if (req.method === 'DELETE') {
-    try {
-      // Authentifizierung prüfen
-      const authResponse = await fetch(`${req.headers.origin}/api/auth/check`, {
-        headers: { cookie: req.headers.cookie || '' }
-      });
-      
-      if (!authResponse.ok) {
-        return res.status(401).json({ error: 'Nicht authentifiziert' });
-      }
-
-      // Vitrine löschen (Regale werden durch CASCADE gelöscht)
-      const result = await database.run('DELETE FROM showcases WHERE id = ?', [id]);
-
-      if (result.changes === 0) {
-        return res.status(404).json({ error: 'Vitrine nicht gefunden' });
-      }
-
-      res.status(200).json({ message: 'Vitrine erfolgreich gelöscht' });
-    } catch (error) {
-      console.error('Fehler beim Löschen der Vitrine:', error);
-      res.status(500).json({ error: 'Fehler beim Löschen der Vitrine' });
+      console.error('Fehler beim Löschen des Regals:', error);
+      res.status(500).json({ error: 'Fehler beim Löschen des Regals' });
     }
   } else {
     res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
@@ -163,7 +160,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-// Und am Ende der Datei:
 export const config = {
   api: {
     bodyParser: false,

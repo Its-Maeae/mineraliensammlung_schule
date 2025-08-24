@@ -50,6 +50,10 @@ export default function Home() {
   const [showShelfMineralsModal, setShowShelfMineralsModal] = useState(false);
   const [selectedShelf, setSelectedShelf] = useState<any>(null);
   const [shelfMinerals, setShelfMinerals] = useState<Mineral[]>([]);
+  const [editMode, setEditMode] = useState<'mineral' | 'showcase' | 'shelf' | null>(null);
+  const [editFormData, setEditFormData] = useState<any>({});
+  const [editImage, setEditImage] = useState<File | null>(null);
+  const [shelves, setShelves] = useState<any[]>([]);
 
   useEffect(() => {
     loadStats();
@@ -60,6 +64,22 @@ export default function Home() {
       loadShowcases();
     }
   }, [currentPage]);
+
+  useEffect(() => {
+    loadShelves();
+  }, []);
+
+  const loadShelves = async () => {
+    try {
+      const response = await fetch('/api/shelves');
+      if (response.ok) {
+        const data = await response.json();
+        setShelves(data);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Regale:', error);
+    }
+  };
 
   const loadStats = async () => {
     try {
@@ -303,6 +323,191 @@ const openShelfDetails = async (shelfId: number) => {
     }
   };
 
+  // Mineral bearbeiten
+const handleEditMineral = (mineral: Mineral) => {
+  setEditFormData({
+    id: mineral.id,
+    name: mineral.name,
+    number: mineral.number,
+    color: mineral.color || '',
+    description: mineral.description || '',
+    location: mineral.location || '',
+    purchase_location: mineral.purchase_location || '',
+    rock_type: mineral.rock_type || '',
+    shelf_id: mineral.shelf_id || ''
+  });
+  setEditMode('mineral');
+  setEditImage(null);
+};
+
+// Vitrine bearbeiten
+const handleEditShowcase = (showcase: Showcase) => {
+  setEditFormData({
+    id: showcase.id,
+    name: showcase.name,
+    code: showcase.code,
+    location: showcase.location || '',
+    description: showcase.description || ''
+  });
+  setEditMode('showcase');
+  setEditImage(null);
+};
+
+// Regal bearbeiten
+const handleEditShelf = (shelf: any) => {
+  setEditFormData({
+    id: shelf.id,
+    name: shelf.shelf_name,
+    code: shelf.shelf_code,
+    description: shelf.description || '',
+    position_order: 0,
+    showcase_id: selectedShowcase?.id
+  });
+  setEditMode('shelf');
+  setEditImage(null);
+};
+
+// Update-Funktion
+const handleUpdateSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const formData = new FormData();
+    Object.keys(editFormData).forEach(key => {
+      if (key !== 'id') {
+        formData.append(key, editFormData[key]);
+      }
+    });
+    
+    if (editImage) {
+      formData.append('image', editImage);
+    }
+
+    let url = '';
+    let entityName = '';
+    switch (editMode) {
+      case 'mineral':
+        url = `/api/minerals/${editFormData.id}`;
+        entityName = 'Mineral';
+        break;
+      case 'showcase':
+        url = `/api/showcases/${editFormData.id}`;
+        entityName = 'Vitrine';
+        break;
+      case 'shelf':
+        url = `/api/shelves/${editFormData.id}`;
+        entityName = 'Regal';
+        break;
+    }
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      body: formData
+    });
+
+    if (response.ok) {
+      setEditMode(null);
+      setEditImage(null);
+      loadStats();
+      
+      // Entsprechende Listen neu laden
+      if (editMode === 'mineral') {
+        if (currentPage === 'collection') loadMinerals();
+        setShowMineralModal(false);
+        setSelectedMineral(null);
+      } else if (editMode === 'showcase') {
+        loadShowcases();
+        if (selectedShowcase) {
+          // Vitrine-Details neu laden um aktualisierte Daten zu zeigen
+          await openShowcaseDetails(selectedShowcase.id);
+        }
+      } else if (editMode === 'shelf') {
+        if (selectedShowcase) {
+          await openShowcaseDetails(selectedShowcase.id);
+        }
+        setShowShelfMineralsModal(false);
+        setSelectedShelf(null);
+      }
+      
+      alert(`${entityName} erfolgreich aktualisiert!`);
+    } else {
+      const errorData = await response.json();
+      alert('Fehler: ' + (errorData.error || 'Unbekannter Fehler'));
+    }
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren:', error);
+    alert('Fehler beim Aktualisieren. Bitte versuchen Sie es erneut.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Delete-Funktion
+const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) => {
+  const confirmMessage = {
+    mineral: 'Möchten Sie dieses Mineral wirklich löschen?',
+    showcase: 'Möchten Sie diese Vitrine wirklich löschen? Alle zugehörigen Regale werden ebenfalls gelöscht!',
+    shelf: 'Möchten Sie dieses Regal wirklich löschen? Alle zugeordneten Mineralien werden nicht gelöscht, aber ihre Regal-Zuordnung entfernt!'
+  };
+
+  if (!confirm(confirmMessage[type])) {
+    return;
+  }
+
+  try {
+    setLoading(true);
+    
+    let url = '';
+    switch (type) {
+      case 'mineral':
+        url = `/api/minerals/${id}`;
+        break;
+      case 'showcase':
+        url = `/api/showcases/${id}`;
+        break;
+      case 'shelf':
+        url = `/api/shelves/${id}`;
+        break;
+    }
+
+    const response = await fetch(url, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      // Modals schließen
+      if (type === 'mineral') {
+        setShowMineralModal(false);
+      } else if (type === 'showcase') {
+        setShowShowcaseModal(false);
+      } else if (type === 'shelf') {
+        setShowShelfMineralsModal(false);
+      }
+
+      // Listen neu laden
+      loadStats();
+      if (currentPage === 'collection') loadMinerals();
+      if (currentPage === 'vitrines') loadShowcases();
+      
+      // Bei Vitrine oder Regal: Showcase-Details neu laden
+      if ((type === 'showcase' || type === 'shelf') && selectedShowcase && type !== 'showcase') {
+        openShowcaseDetails(selectedShowcase.id);
+      }
+
+      alert(`${type === 'mineral' ? 'Mineral' : type === 'showcase' ? 'Vitrine' : 'Regal'} erfolgreich gelöscht!`);
+    } else {
+      const error = await response.text();
+      alert('Fehler: ' + error);
+    }
+  } catch (error) {
+    console.error('Fehler beim Löschen:', error);
+    alert('Fehler beim Löschen');
+  } finally {
+    setLoading(false);
+  }
+};
+
   const clearFilters = () => {
     setSearchTerm('');
     setColorFilter('');
@@ -319,7 +524,7 @@ const openShelfDetails = async (shelfId: number) => {
   return (
     <>
       <Head>
-        <title>Mineraliensammlung - Marius Weber</title>
+        <title>Mineraliensammlung - Marius</title>
         <meta name="description" content="Entdecken Sie eine faszinierende Sammlung seltener Mineralien und Gesteine." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -810,6 +1015,23 @@ const openShelfDetails = async (shelfId: number) => {
                 {selectedMineral.description || 'Keine Beschreibung verfügbar.'}
               </p>
             </div>
+
+            {isAuthenticated && (
+              <div className="admin-buttons">
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => handleEditMineral(selectedMineral)}
+                >
+                  ✏️ Bearbeiten
+                </button>
+                <button 
+                  className="btn error-btn"
+                  onClick={() => handleDelete('mineral', selectedMineral.id)}
+                >
+                  🗑️ Löschen
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -869,6 +1091,24 @@ const openShelfDetails = async (shelfId: number) => {
               </div>
             )}
 
+            {isAuthenticated && (
+              <div className="admin-buttons">
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => handleEditShowcase(selectedShowcase)}
+                >
+                  ✏️ Bearbeiten
+                </button>
+                <button 
+                  className="btn error-btn"
+                  onClick={() => handleDelete('showcase', selectedShowcase.id)}
+                >
+                  🗑️ Löschen
+                </button>
+              </div>
+            )}
+
+
             {/* Regale der Vitrine anzeigen */}
             {selectedShowcase.shelves && selectedShowcase.shelves.length > 0 && (
               <div style={{ marginTop: '30px' }}>
@@ -911,6 +1151,23 @@ const openShelfDetails = async (shelfId: number) => {
             <p style={{ color: 'var(--gray-600)', marginBottom: 'var(--space-6)' }}>
               {selectedShelf.showcase_name} - {selectedShelf.full_code}
             </p>
+
+            {isAuthenticated && (
+              <div className="admin-buttons">
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => handleEditShelf(selectedShelf)}
+                >
+                  ✏️ Bearbeiten
+                </button>
+                <button 
+                  className="btn error-btn"
+                  onClick={() => handleDelete('shelf', selectedShelf.id)}
+                >
+                  🗑️ Löschen
+                </button>
+              </div>
+            )}
             
             {selectedShelf.image_path && (
               <div className="detail-image" style={{ marginBottom: 'var(--space-6)' }}>
@@ -1153,6 +1410,215 @@ const openShelfDetails = async (shelfId: number) => {
                   disabled={loading}
                 >
                   {loading ? 'Wird hinzugefügt...' : 'Regal hinzufügen'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editMode && (
+        <div className="modal" style={{ display: 'flex' }}>
+          <div className="modal-content">
+            <span className="close-button" onClick={() => {
+              setEditMode(null);
+              setEditImage(null);
+            }}>&times;</span>
+            <h2>
+              {editMode === 'mineral' ? 'Mineral bearbeiten' : 
+              editMode === 'showcase' ? 'Vitrine bearbeiten' : 
+              'Regal bearbeiten'}
+            </h2>
+            
+            <form onSubmit={handleUpdateSubmit}>
+              {editMode === 'mineral' && (
+                <>
+                  <div className="form-group">
+                    <label>Name des Minerals</label>
+                    <input
+                      type="text"
+                      value={editFormData.name || ''}
+                      onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Steinnummer</label>
+                    <input
+                      type="text"
+                      value={editFormData.number || ''}
+                      onChange={(e) => setEditFormData({...editFormData, number: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Farbe</label>
+                    <input
+                      type="text"
+                      value={editFormData.color || ''}
+                      onChange={(e) => setEditFormData({...editFormData, color: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Beschreibung</label>
+                    <textarea
+                      value={editFormData.description || ''}
+                      onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                      rows={4}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Fundort</label>
+                    <input
+                      type="text"
+                      value={editFormData.location || ''}
+                      onChange={(e) => setEditFormData({...editFormData, location: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Kaufort</label>
+                    <input
+                      type="text"
+                      value={editFormData.purchase_location || ''}
+                      onChange={(e) => setEditFormData({...editFormData, purchase_location: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Gesteinsart</label>
+                    <input
+                      type="text"
+                      value={editFormData.rock_type || ''}
+                      onChange={(e) => setEditFormData({...editFormData, rock_type: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Regal</label>
+                    <select
+                      value={editFormData.shelf_id || ''}
+                      onChange={(e) => setEditFormData({...editFormData, shelf_id: e.target.value})}
+                    >
+                      <option value="">Kein Regal zugeordnet</option>
+                      {shelves.map(shelf => (
+                        <option key={shelf.id} value={shelf.id}>
+                          {shelf.showcase_name} - {shelf.name} ({shelf.full_code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {editMode === 'showcase' && (
+                <>
+                  <div className="form-group">
+                    <label>Name der Vitrine</label>
+                    <input
+                      type="text"
+                      value={editFormData.name || ''}
+                      onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Vitrine-Code</label>
+                    <input
+                      type="text"
+                      value={editFormData.code || ''}
+                      onChange={(e) => setEditFormData({...editFormData, code: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Standort</label>
+                    <input
+                      type="text"
+                      value={editFormData.location || ''}
+                      onChange={(e) => setEditFormData({...editFormData, location: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Beschreibung</label>
+                    <textarea
+                      value={editFormData.description || ''}
+                      onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                      rows={4}
+                    />
+                  </div>
+                </>
+              )}
+
+              {editMode === 'shelf' && (
+                <>
+                  <div className="form-group">
+                    <label>Name des Regals</label>
+                    <input
+                      type="text"
+                      value={editFormData.name || ''}
+                      onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Regal-Code</label>
+                    <input
+                      type="text"
+                      value={editFormData.code || ''}
+                      onChange={(e) => setEditFormData({...editFormData, code: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Beschreibung</label>
+                    <textarea
+                      value={editFormData.description || ''}
+                      onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Position/Reihenfolge</label>
+                    <input
+                      type="number"
+                      value={editFormData.position_order || 0}
+                      onChange={(e) => setEditFormData({...editFormData, position_order: parseInt(e.target.value) || 0})}
+                      min="0"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="form-group">
+                <label>Bild ersetzen (optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setEditImage(e.target.files?.[0] || null)}
+                />
+                {editImage && (
+                  <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--gray-600)' }}>
+                    Neues Bild: {editImage.name}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'flex-end', marginTop: 'var(--space-6)' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setEditMode(null);
+                    setEditImage(null);
+                  }}
+                >
+                  Abbrechen
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? 'Wird gespeichert...' : 'Änderungen speichern'}
                 </button>
               </div>
             </form>
@@ -2298,6 +2764,41 @@ const openShelfDetails = async (shelfId: number) => {
         .mineral-info-small p strong {
           color: var(--gray-800);
           font-weight: 600;
+        }
+
+        .btn.error-btn {
+          background: var(--error-color);
+          color: var(--white);
+          border: 2px solid var(--error-color);
+        }
+
+        .btn.error-btn:hover {
+          background: #dc2626;
+          border-color: #dc2626;
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-md);
+        }
+
+        /* Admin-Buttons Container */
+        .admin-buttons {
+          display: flex;
+          gap: var(--space-4);
+          justify-content: center;
+          margin-top: var(--space-6);
+          padding-top: var(--space-4);
+          border-top: 1px solid var(--gray-200);
+        }
+
+        @media (max-width: 768px) {
+          .admin-buttons {
+            flex-direction: column;
+            align-items: center;
+          }
+          
+          .admin-buttons .btn {
+            width: 100%;
+            max-width: 200px;
+          }
         }
 
         /* Mobile Anpassungen */
