@@ -167,14 +167,14 @@ const handleVitrineSubmit = async (e: React.FormEvent) => {
       setShowVitrineForm(false);
       loadShowcases();
       loadStats();
-      alert('Vitrine erfolgreich hinzugefÃ¼gt!');
+      alert('Vitrine erfolgreich hinzugefügt!');
     } else {
       const error = await response.text();
       alert('Fehler: ' + error);
     }
   } catch (error) {
-    console.error('Fehler beim HinzufÃ¼gen der Vitrine:', error);
-    alert('Fehler beim HinzufÃ¼gen der Vitrine');
+    console.error('Fehler beim Hinzufügen der Vitrine:', error);
+    alert('Fehler beim Hinzufügen der Vitrine');
   } finally {
     setLoading(false);
   }
@@ -213,14 +213,14 @@ const handleShelfSubmit = async (e: React.FormEvent) => {
       // Vitrine Details neu laden
       openShowcaseDetails(selectedShowcase!.id);
       loadStats();
-      alert('Regal erfolgreich hinzugefÃ¼gt!');
+      alert('Regal erfolgreich hinzugefügt!');
     } else {
       const error = await response.text();
       alert('Fehler: ' + error);
     }
   } catch (error) {
-    console.error('Fehler beim HinzufÃ¼gen des Regals:', error);
-    alert('Fehler beim HinzufÃ¼gen des Regals');
+    console.error('Fehler beim Hinzufügen des Regals:', error);
+    alert('Fehler beim Hinzufügen des Regals');
   } finally {
     setLoading(false);
   }
@@ -330,7 +330,7 @@ const openShelfDetails = async (shelfId: number) => {
         <div className="container">
           <div className="header-content">
             <div className="logo">
-              <div className="logo-icon">ðŸ’Ž</div>
+              <div className="logo-icon">💎</div>
               <div className="logo-text">
                 <span className="logo-title">Mineralien</span>
                 <span className="logo-subtitle">Sammlung Marius</span>
@@ -397,8 +397,8 @@ const openShelfDetails = async (shelfId: number) => {
                     <span className="hero-highlight"> Mineralien</span>
                   </h1>
                   <p className="hero-description">
-                    Entdecken Sie eine auÃŸergewÃ¶hnliche Sammlung seltener Mineralien und Gesteine. 
-                    Jedes Exemplar erzÃ¤hlt eine millionenjÃ¤hrige Geschichte der Erdgeschichte.
+                    Entdecken Sie eine außergewöhnliche Sammlung seltener Mineralien und Gesteine. 
+                    Jedes Exemplar erzählt eine millionenjährige Geschichte der Erdgeschichte.
                   </p>
                   <div className="hero-buttons">
                     <button className="btn btn-primary" onClick={() => showPage('collection')}>
@@ -411,12 +411,12 @@ const openShelfDetails = async (shelfId: number) => {
                 </div>
                 
                 <div className="hero-visual">
-                  <div className="hero-crystal">ðŸ’Ž</div>
+                  <div className="hero-crystal">💎</div>
                   <div className="hero-particles">
-                    <span className="particle">âœ¨</span>
-                    <span className="particle">ðŸ”¬</span>
-                    <span className="particle">â­</span>
-                    <span className="particle">ðŸ’«</span>
+                    <span className="particle">✨</span>
+                    <span className="particle">🔬</span>
+                    <span className="particle">⭐</span>
+                    <span className="particle">💫</span>
                   </div>
                 </div>
               </div>
@@ -458,7 +458,7 @@ const openShelfDetails = async (shelfId: number) => {
                 
                 <div className="features-grid">
                   <div className="feature-card">
-                    <div className="feature-icon">ðŸ”</div>
+                    <div className="feature-icon">🔍</div>
                     <h3 className="feature-title">Intelligente Suche</h3>
                     <p className="feature-description">
                       Suchen Sie nach Namen, Steinnummer oder Eigenschaften. 
@@ -467,8 +467,8 @@ const openShelfDetails = async (shelfId: number) => {
                   </div>
                   
                   <div className="feature-card">
-                    <div className="feature-icon">ðŸŽ¯</div>
-                    <h3 className="feature-title">PrÃ¤zise Filter</h3>
+                    <div className="feature-icon">🎯</div>
+                    <h3 className="feature-title">Präzise Filter</h3>
                     <p className="feature-description">
                       Filtern Sie nach Farbe, Fundort, Gesteinsart oder Standort. 
                       Finden Sie genau das gesuchte Mineral.
@@ -476,11 +476,11 @@ const openShelfDetails = async (shelfId: number) => {
                   </div>
                   
                   <div className="feature-card">
-                    <div className="feature-icon">ðŸ“Š</div>
+                    <div className="feature-icon">📊</div>
                     <h3 className="feature-title">Detaillierte Dokumentation</h3>
                     <p className="feature-description">
                       Jedes Mineral ist wissenschaftlich dokumentiert mit 
-                      Herkunft, Eigenschaften und hochauflÃ¶senden Bildern.
+                      Herkunft, Eigenschaften und hochauflösenden Bildern.
                     </p>
                   </div>
                 </div>
@@ -492,29 +492,29 @@ const openShelfDetails = async (shelfId: number) => {
               <div className="container">
                 <div className="about-content">
                   <div className="about-text">
-                    <h2 className="about-title">Ãœber die Sammlung</h2>
+                    <h2 className="about-title">Über die Sammlung</h2>
                     <p className="about-description">
                       Diese private Mineraliensammlung ist das Ergebnis jahrelanger 
-                      Leidenschaft fÃ¼r Geologie und Mineralogie. Jedes Exemplar wurde 
-                      sorgfÃ¤ltig ausgewÃ¤hlt und dokumentiert.
+                      Leidenschaft für Geologie und Mineralogie. Jedes Exemplar wurde 
+                      sorgfältig ausgewählt und dokumentiert.
                     </p>
                     <p className="about-description">
-                      Von glÃ¤nzenden Kristallen bis hin zu seltenen geologischen 
-                      Formationen - entdecken Sie die SchÃ¶nheit und Vielfalt 
+                      Von glänzenden Kristallen bis hin zu seltenen geologischen 
+                      Formationen - entdecken Sie die Schönheit und Vielfalt 
                       unserer Erde in ihrer reinsten Form.
                     </p>
                   </div>
                   
                   <div className="about-visual">
                     <div className="about-card">
-                      <div className="about-card-icon">ðŸŒ</div>
+                      <div className="about-card-icon">🌍</div>
                       <h4>Weltweite Fundorte</h4>
                       <p>Mineralien aus allen Kontinenten</p>
                     </div>
                     <div className="about-card">
-                      <div className="about-card-icon">ðŸ”¬</div>
+                      <div className="about-card-icon">🔬</div>
                       <h4>Wissenschaftlich dokumentiert</h4>
-                      <p>PrÃ¤zise Katalogisierung</p>
+                      <p>Präzise Katalogisierung</p>
                     </div>
                   </div>
                 </div>
@@ -589,7 +589,7 @@ const openShelfDetails = async (shelfId: number) => {
                     {rockTypeFilter && <span className="filter-tag">Gesteinsart: {rockTypeFilter}</span>}
                   </div>
                   <button className="clear-filters" onClick={clearFilters}>
-                    Filter zurÃ¼cksetzen
+                    Filter zurücksetzen
                   </button>
                 </div>
               )}
@@ -623,7 +623,7 @@ const openShelfDetails = async (shelfId: number) => {
                         {mineral.image_path ? (
                           <img src={`/uploads/${mineral.image_path}`} alt={mineral.name} />
                         ) : (
-                          <div className="placeholder">ðŸ“¸</div>
+                          <div className="placeholder">📸</div>
                         )}
                       </div>
                       <div className="mineral-info">
@@ -654,7 +654,7 @@ const openShelfDetails = async (shelfId: number) => {
                     <button 
                       className="btn btn-primary"
                       onClick={() => setShowVitrineForm(true)}>
-                        Neue Vitrine hinzufÃ¼gen
+                        Neue Vitrine hinzufügen
                     </button>
                   )}
                 </div>
@@ -665,8 +665,8 @@ const openShelfDetails = async (shelfId: number) => {
                   <div className="loading">Lade Vitrinen...</div>
                 ) : showcases.length === 0 ? (
                   <div className="no-showcases">
-                    <h3>ðŸ›ï¸ Noch keine Vitrinen vorhanden</h3>
-                    <p>FÃ¼gen Sie Ihre erste Vitrine hinzu, um Ihre Sammlung zu organisieren.</p>
+                    <h3>🛏️ Noch keine Vitrinen vorhanden</h3>
+                    <p>Fügen Sie Ihre erste Vitrine hinzu, um Ihre Sammlung zu organisieren.</p>
                   </div>
                 ) : (
                   showcases.map(showcase => (
@@ -679,7 +679,7 @@ const openShelfDetails = async (shelfId: number) => {
                         {showcase.image_path ? (
                           <img src={`/uploads/${showcase.image_path}`} alt={showcase.name} />
                         ) : (
-                          <div className="placeholder">ðŸ›ï¸</div>
+                          <div className="placeholder">🛏️</div>
                         )}
                       </div>
                       <div className="vitrine-info">
@@ -713,7 +713,7 @@ const openShelfDetails = async (shelfId: number) => {
             <div className="container">
               <div className="page-header">
                 <h1 className="page-title">Verwaltung</h1>
-                <p className="page-description">Neue Mineralien zur Sammlung hinzufÃ¼gen</p>
+                <p className="page-description">Neue Mineralien zur Sammlung hinzufügen</p>
               </div>
               
               <div className="admin-form-container">
@@ -797,7 +797,7 @@ const openShelfDetails = async (shelfId: number) => {
                 </span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">HinzugefÃ¼gt:</span>
+                <span className="detail-label">Hinzugefügt:</span>
                 <span className="detail-value">
                   {new Date(selectedMineral.created_at).toLocaleDateString('de-DE')}
                 </span>
@@ -807,7 +807,7 @@ const openShelfDetails = async (shelfId: number) => {
             <div style={{ marginTop: '20px' }}>
               <h3>Beschreibung</h3>
               <p style={{ marginTop: '10px', color: '#555', lineHeight: '1.6' }}>
-                {selectedMineral.description || 'Keine Beschreibung verfÃ¼gbar.'}
+                {selectedMineral.description || 'Keine Beschreibung verfügbar.'}
               </p>
             </div>
           </div>
@@ -825,7 +825,7 @@ const openShelfDetails = async (shelfId: number) => {
                 className="btn btn-primary"
                 style={{ marginBottom: 'var(--space-4)' }}
                 onClick={() => setShowShelfForm(true)}>
-                  Neues Regal hinzufÃ¼gen
+                  Neues Regal hinzufügen
               </button>
             )}
             
@@ -853,7 +853,7 @@ const openShelfDetails = async (shelfId: number) => {
                 <span className="detail-value">{selectedShowcase.mineral_count || 0}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">HinzugefÃ¼gt:</span>
+                <span className="detail-label">Hinzugefügt:</span>
                 <span className="detail-value">
                   {new Date(selectedShowcase.created_at).toLocaleDateString('de-DE')}
                 </span>
@@ -926,7 +926,7 @@ const openShelfDetails = async (shelfId: number) => {
               <div className="loading">Lade Mineralien...</div>
             ) : shelfMinerals.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--gray-500)' }}>
-                <p>ðŸ—³ï¸ Dieses Regal ist noch leer</p>
+                <p>🗳️ Dieses Regal ist noch leer</p>
                 <p>Keine Mineralien zugeordnet</p>
               </div>
             ) : (
@@ -944,7 +944,7 @@ const openShelfDetails = async (shelfId: number) => {
                       {mineral.image_path ? (
                         <img src={`/uploads/${mineral.image_path}`} alt={mineral.name} />
                       ) : (
-                        <div className="placeholder">ðŸ“¸</div>
+                        <div className="placeholder">📸</div>
                       )}
                     </div>
                     <div className="mineral-info-small">
@@ -968,7 +968,7 @@ const openShelfDetails = async (shelfId: number) => {
               setShowVitrineForm(false);
               setVitrineImage(null);
             }}>&times;</span>
-            <h2>Neue Vitrine hinzufÃ¼gen</h2>
+            <h2>Neue Vitrine hinzufügen</h2>
             
             <form onSubmit={handleVitrineSubmit}>
               <div className="form-group">
@@ -1027,7 +1027,7 @@ const openShelfDetails = async (shelfId: number) => {
                 />
                 {vitrineImage && (
                   <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--gray-600)' }}>
-                    AusgewÃ¤hlt: {vitrineImage.name}
+                    Ausgewählt: {vitrineImage.name}
                   </div>
                 )}
               </div>
@@ -1048,7 +1048,7 @@ const openShelfDetails = async (shelfId: number) => {
                   className="btn btn-primary"
                   disabled={loading}
                 >
-                  {loading ? 'Wird hinzugefÃ¼gt...' : 'Vitrine hinzufÃ¼gen'}
+                  {loading ? 'Wird hinzugefügt...' : 'Vitrine hinzufügen'}
                 </button>
               </div>
             </form>
@@ -1065,7 +1065,7 @@ const openShelfDetails = async (shelfId: number) => {
               setShowShelfForm(false);
               setShelfImage(null);
             }}>&times;</span>
-            <h2>Neues Regal fÃ¼r {selectedShowcase.name} hinzufÃ¼gen</h2>
+            <h2>Neues Regal für {selectedShowcase.name} hinzufügen</h2>
             
             <form onSubmit={handleShelfSubmit}>
               <div className="form-group">
@@ -1091,7 +1091,7 @@ const openShelfDetails = async (shelfId: number) => {
                   required
                 />
                 <small style={{ color: 'var(--gray-600)', fontSize: 'var(--font-size-sm)' }}>
-                  VollstÃ¤ndiger Code wird: {selectedShowcase.code}-{shelfFormData.code}
+                  Vollständiger Code wird: {selectedShowcase.code}-{shelfFormData.code}
                 </small>
               </div>
 
@@ -1131,7 +1131,7 @@ const openShelfDetails = async (shelfId: number) => {
                 />
                 {shelfImage && (
                   <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--gray-600)' }}>
-                    AusgewÃ¤hlt: {shelfImage.name}
+                    Ausgewählt: {shelfImage.name}
                   </div>
                 )}
               </div>
@@ -1152,7 +1152,7 @@ const openShelfDetails = async (shelfId: number) => {
                   className="btn btn-primary"
                   disabled={loading}
                 >
-                  {loading ? 'Wird hinzugefÃ¼gt...' : 'Regal hinzufÃ¼gen'}
+                  {loading ? 'Wird hinzugefügt...' : 'Regal hinzufügen'}
                 </button>
               </div>
             </form>
@@ -2528,14 +2528,14 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
         });
         setImage(null);
         onSuccess();
-        alert('Mineral erfolgreich hinzugefÃ¼gt!');
+        alert('Mineral erfolgreich hinzugefügt!');
       } else {
         const error = await response.text();
         alert('Fehler: ' + error);
       }
     } catch (error) {
-      console.error('Fehler beim HinzufÃ¼gen des Minerals:', error);
-      alert('Fehler beim HinzufÃ¼gen des Minerals');
+      console.error('Fehler beim Hinzufügen des Minerals:', error);
+      alert('Fehler beim Hinzufügen des Minerals');
     } finally {
       setLoading(false);
     }
@@ -2622,7 +2622,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
           id="rock_type"
           value={formData.rock_type}
           onChange={(e) => setFormData({...formData, rock_type: e.target.value})}
-          placeholder="z.B. magmatisch, sedimentÃ¤r, metamorph"
+          placeholder="z.B. magmatisch, sedimentär, metamorph"
           required
         />
       </div>
@@ -2654,7 +2654,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       <button type="submit" disabled={loading} className="btn btn-primary btn-large">
-        {loading ? 'Wird hinzugefÃ¼gt...' : 'Mineral hinzufÃ¼gen'}
+        {loading ? 'Wird hinzugefügt...' : 'Mineral hinzufügen'}
       </button>
     </form>
   );
