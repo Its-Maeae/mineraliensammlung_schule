@@ -246,18 +246,28 @@ const handleShelfSubmit = async (e: React.FormEvent) => {
   }
 };
 
+// Zusätzliche Debug-Funktion für Shelf Details
 const openShelfDetails = async (shelfId: number) => {
   try {
     setLoading(true);
+    console.log('Loading shelf details for ID:', shelfId);
+    
     const response = await fetch(`/api/shelves/${shelfId}/minerals`);
+    const responseData = await response.json();
+    
+    console.log('Shelf details response:', responseData);
+    
     if (response.ok) {
-      const data = await response.json();
-      setSelectedShelf(data.shelfInfo);
-      setShelfMinerals(data.minerals);
+      setSelectedShelf(responseData.shelfInfo);
+      setShelfMinerals(responseData.minerals);
       setShowShelfMineralsModal(true);
+    } else {
+      console.error('Error loading shelf details:', responseData);
+      alert('Fehler beim Laden der Regal-Details: ' + (responseData.error || 'Unbekannter Fehler'));
     }
   } catch (error) {
     console.error('Fehler beim Laden der Regal-Details:', error);
+    alert('Fehler beim Laden der Regal-Details');
   } finally {
     setLoading(false);
   }
@@ -355,13 +365,14 @@ const handleEditShowcase = (showcase: Showcase) => {
 
 // Regal bearbeiten
 const handleEditShelf = (shelf: any) => {
+  console.log('Edit shelf:', shelf);
   setEditFormData({
     id: shelf.id,
-    name: shelf.name,
+    name: shelf.name || shelf.shelf_name,
     code: shelf.code,
     description: shelf.description || '',
     position_order: shelf.position_order || 0,
-    showcase_id: selectedShowcase?.id
+    showcase_id: shelf.showcase_id || selectedShowcase?.id
   });
   setEditMode('shelf');
   setEditImage(null);
@@ -374,9 +385,11 @@ const handleUpdateSubmit = async (e: React.FormEvent) => {
 
   try {
     const formData = new FormData();
+    
+    // Daten zum FormData hinzufügen
     Object.keys(editFormData).forEach(key => {
-      if (key !== 'id') {
-        formData.append(key, editFormData[key]);
+      if (key !== 'id' && editFormData[key] !== undefined && editFormData[key] !== null) {
+        formData.append(key, editFormData[key].toString());
       }
     });
     
@@ -401,15 +414,24 @@ const handleUpdateSubmit = async (e: React.FormEvent) => {
         break;
     }
 
+    console.log('Sending update to:', url);
+    console.log('FormData entries:');
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
     const response = await fetch(url, {
       method: 'PUT',
       body: formData
     });
 
+    const responseData = await response.json();
+    console.log('Update response:', responseData);
+
     if (response.ok) {
       setEditMode(null);
       setEditImage(null);
-      loadStats();
+      setEditFormData({});
       
       // Entsprechende Listen neu laden
       if (editMode === 'mineral') {
@@ -419,21 +441,23 @@ const handleUpdateSubmit = async (e: React.FormEvent) => {
       } else if (editMode === 'showcase') {
         loadShowcases();
         if (selectedShowcase) {
-          // Vitrine-Details neu laden um aktualisierte Daten zu zeigen
+          // Vitrine-Details neu laden
           await openShowcaseDetails(selectedShowcase.id);
         }
       } else if (editMode === 'shelf') {
         if (selectedShowcase) {
+          // Showcase-Details neu laden um aktualisierte Regalliste zu zeigen
           await openShowcaseDetails(selectedShowcase.id);
         }
+        // Modal schließen
         setShowShelfMineralsModal(false);
         setSelectedShelf(null);
       }
       
+      loadStats(); // Statistiken aktualisieren
       alert(`${entityName} erfolgreich aktualisiert!`);
     } else {
-      const errorData = await response.json();
-      alert('Fehler: ' + (errorData.error || 'Unbekannter Fehler'));
+      alert('Fehler: ' + (responseData.error || 'Unbekannter Fehler'));
     }
   } catch (error) {
     console.error('Fehler beim Aktualisieren:', error);
@@ -471,38 +495,57 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
         break;
     }
 
+    console.log('Deleting:', type, 'ID:', id, 'URL:', url);
+
     const response = await fetch(url, {
       method: 'DELETE'
     });
+
+    const responseData = await response.text();
+    console.log('Delete response:', responseData);
 
     if (response.ok) {
       // Modals schließen
       if (type === 'mineral') {
         setShowMineralModal(false);
+        setSelectedMineral(null);
       } else if (type === 'showcase') {
         setShowShowcaseModal(false);
+        setSelectedShowcase(null);
       } else if (type === 'shelf') {
         setShowShelfMineralsModal(false);
+        setSelectedShelf(null);
       }
 
       // Listen neu laden
       loadStats();
-      if (currentPage === 'collection') loadMinerals();
-      if (currentPage === 'vitrines') loadShowcases();
       
-      // Bei Vitrine oder Regal: Showcase-Details neu laden
-      if ((type === 'showcase' || type === 'shelf') && selectedShowcase && type !== 'showcase') {
-        openShowcaseDetails(selectedShowcase.id);
+      if (currentPage === 'collection') {
+        loadMinerals();
+      }
+      
+      if (currentPage === 'vitrines') {
+        loadShowcases();
+      }
+      
+      // Bei Regal: Showcase-Details neu laden um aktualisierte Regalliste zu zeigen
+      if (type === 'shelf' && selectedShowcase) {
+        await openShowcaseDetails(selectedShowcase.id);
       }
 
-      alert(`${type === 'mineral' ? 'Mineral' : type === 'showcase' ? 'Vitrine' : 'Regal'} erfolgreich gelöscht!`);
+      const entityNames = {
+        mineral: 'Mineral',
+        showcase: 'Vitrine',
+        shelf: 'Regal'
+      };
+
+      alert(`${entityNames[type]} erfolgreich gelöscht!`);
     } else {
-      const error = await response.text();
-      alert('Fehler: ' + error);
+      alert('Fehler beim Löschen: ' + responseData);
     }
   } catch (error) {
     console.error('Fehler beim Löschen:', error);
-    alert('Fehler beim Löschen');
+    alert('Fehler beim Löschen. Bitte versuchen Sie es erneut.');
   } finally {
     setLoading(false);
   }
@@ -524,8 +567,8 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
   return (
     <>
       <Head>
-        <title>Mineraliensammlung - Marius</title>
-        <meta name="description" content="Entdecken Sie eine faszinierende Sammlung seltener Mineralien und Gesteine." />
+        <title>Mineraliensammlung - Samuel von Pufendorf Gymnasium Flöha</title>
+        <meta name="description" content="Entdecken Sie die Sammlung seltener Mineralien und Gesteine des Samuel von Pufendorf Gymnasium." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -537,8 +580,8 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
             <div className="logo">
               <div className="logo-icon">💎</div>
               <div className="logo-text">
-                <span className="logo-title">Mineralien</span>
-                <span className="logo-subtitle">Sammlung Marius</span>
+                <span className="logo-title">Gesteins- und Mineraliensammlung</span>
+                <span className="logo-subtitle">Samuel von Pufendorf Gymnasium Flöha</span>
               </div>
             </div>
             
@@ -599,11 +642,11 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                 <div className="hero-content">
                   <h1 className="hero-title">
                     Faszinierende Welt der
-                    <span className="hero-highlight"> Mineralien</span>
+                    <span className="hero-highlight"> Mineralien und Gesteine</span>
                   </h1>
                   <p className="hero-description">
-                    Entdecken Sie eine außergewöhnliche Sammlung seltener Mineralien und Gesteine. 
-                    Jedes Exemplar erzählt eine millionenjährige Geschichte der Erdgeschichte.
+                    Entdecken Sie die umfangreiche Sammlung seltener Mineralien und Gesteine 
+                    des Samuel von Pufendorf Gymnasium Flöha auf interaktive Art.
                   </p>
                   <div className="hero-buttons">
                     <button className="btn btn-primary" onClick={() => showPage('collection')}>
@@ -657,7 +700,7 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                 <div className="section-header">
                   <h2 className="section-title">Sammlungsfeatures</h2>
                   <p className="section-description">
-                    Moderne Technologie trifft auf traditionelle Mineralogie
+                    Was kann dieses Archiv?
                   </p>
                 </div>
                 
@@ -685,7 +728,7 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                     <h3 className="feature-title">Detaillierte Dokumentation</h3>
                     <p className="feature-description">
                       Jedes Mineral ist wissenschaftlich dokumentiert mit 
-                      Herkunft, Eigenschaften und hochauflösenden Bildern.
+                      Herkunft, Eigenschaften und passenden Bildern.
                     </p>
                   </div>
                 </div>
@@ -699,14 +742,12 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                   <div className="about-text">
                     <h2 className="about-title">Über die Sammlung</h2>
                     <p className="about-description">
-                      Diese private Mineraliensammlung ist das Ergebnis jahrelanger 
-                      Leidenschaft für Geologie und Mineralogie. Jedes Exemplar wurde 
-                      sorgfältig ausgewählt und dokumentiert.
+                      Diese Sammlung ist Eigentum der Samuel von Pufendorf Schule in Flöha. 
+                      Sowohl Lehrer als auch andere Personen trugen zu dieser Sammlung bei.
                     </p>
                     <p className="about-description">
-                      Von glänzenden Kristallen bis hin zu seltenen geologischen 
-                      Formationen - entdecken Sie die Schönheit und Vielfalt 
-                      unserer Erde in ihrer reinsten Form.
+                      Von verschiedensten Gesteinen bis hin zu seltenen 
+                      Mineralien sind in dieser Sammlung zu finden.
                     </p>
                   </div>
                   
@@ -714,12 +755,12 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                     <div className="about-card">
                       <div className="about-card-icon">🌍</div>
                       <h4>Weltweite Fundorte</h4>
-                      <p>Mineralien aus allen Kontinenten</p>
+                      <p>Mineralien aus verschiedensten Fundorten</p>
                     </div>
                     <div className="about-card">
                       <div className="about-card-icon">🔬</div>
                       <h4>Wissenschaftlich dokumentiert</h4>
-                      <p>Präzise Katalogisierung</p>
+                      <p>Präzise Katalogisierung von Schülern dieser Schule</p>
                     </div>
                   </div>
                 </div>
@@ -853,7 +894,7 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                 <div className="page-header-content">
                   <div>
                     <h1 className="page-title">Vitrinen-Verwaltung</h1>
-                    <p className="page-description">Organisieren Sie Ihre Sammlung in thematischen Vitrinen</p>
+                    <p className="page-description">Finden sie schnell heraus welche Mineralien an welchem Ort lagern.</p>
                   </div>
                   {isAuthenticated && (
                     <button 
