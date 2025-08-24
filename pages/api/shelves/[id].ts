@@ -101,13 +101,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Multer Middleware für Bildupload
       await runMiddleware(req, res, upload.single('image'));
 
-      const { name, code, description, position_order, showcase_id } = (req as any).body;
+      const { name, code, description, position_order } = (req as any).body;
       const image = (req as any).file;
 
-      // Prüfen ob Code bereits in der Vitrine existiert (außer beim aktuellen Regal)
+      // Erst das aktuelle Regal laden um die showcase_id zu bekommen
+      const currentShelf = await database.get('SELECT showcase_id FROM shelves WHERE id = ?', [id]);
+      
+      if (!currentShelf) {
+        return res.status(404).json({ error: 'Regal nicht gefunden' });
+      }
+
+      // Prüfen ob Code bereits in der Vitrine existiert (ABER das aktuelle Regal ausschließen)
       const existingShelf = await database.get(
         'SELECT id FROM shelves WHERE code = ? AND showcase_id = ? AND id != ?',
-        [code, showcase_id, id]
+        [code, currentShelf.showcase_id, id]
       );
 
       if (existingShelf) {
@@ -116,7 +123,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // SQL für Update mit oder ohne neues Bild
       let sql = `UPDATE shelves SET name = ?, code = ?, description = ?, position_order = ?`;
-      let params = [name, code, description, position_order || 0];
+      let params = [name, code, description || '', parseInt(position_order) || 0];
 
       if (image) {
         sql += `, image_path = ?`;
@@ -126,7 +133,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       sql += ` WHERE id = ?`;
       params.push(id);
 
-      await database.run(sql, params);
+      const result = await database.run(sql, params);
+
+      if (result.changes === 0) {
+        return res.status(404).json({ error: 'Regal nicht gefunden' });
+      }
 
       res.status(200).json({ message: 'Regal erfolgreich aktualisiert' });
     } catch (error) {
