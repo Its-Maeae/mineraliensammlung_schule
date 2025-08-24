@@ -1077,20 +1077,12 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
         </div>
       )}
 
-      {/* Showcase Details Modal */}
+      {/* Vitrine Details Modal */}
       {showShowcaseModal && selectedShowcase && (
         <div className="modal" style={{ display: 'flex' }}>
           <div className="modal-content showcase-modal">
             <span className="close-button" onClick={() => setShowShowcaseModal(false)}>&times;</span>
             <h2>{selectedShowcase.name}</h2>
-            {isAuthenticated && (
-              <button 
-                className="btn btn-primary"
-                style={{ marginBottom: 'var(--space-4)' }}
-                onClick={() => setShowShelfForm(true)}>
-                  Neues Regal hinzufügen
-              </button>
-            )}
             
             {selectedShowcase.image_path && (
               <div className="detail-image">
@@ -1134,6 +1126,12 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
 
             {isAuthenticated && (
               <div className="admin-buttons">
+                <button 
+                  className="btn btn-primary"
+                  style={{ marginBottom: 'var(--space-4)' }}
+                  onClick={() => setShowShelfForm(true)}>
+                    Neues Regal hinzufügen
+                </button>
                 <button 
                   className="btn btn-secondary"
                   onClick={() => handleEditShowcase(selectedShowcase)}
