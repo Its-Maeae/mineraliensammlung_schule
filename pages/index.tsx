@@ -1,11 +1,5 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import '../styles/globals.css';
-import '../styles/components.css';
-import '../styles/layout.css';
-import '../styles/collections.css';
-import '../styles/showcase-shelf.css';
-import '../styles/responsive.css';
 import { Mineral, Showcase, Stats } from '../types';
 
 export default function Home() {
@@ -173,14 +167,14 @@ export default function Home() {
         setShowVitrineForm(false);
         loadShowcases();
         loadStats();
-        alert('Vitrine erfolgreich hinzugefügt!');
+        alert('Vitrine erfolgreich hinzugefÃ¼gt!');
       } else {
         const error = await response.text();
         alert('Fehler: ' + error);
       }
     } catch (error) {
-      console.error('Fehler beim Hinzufügen der Vitrine:', error);
-      alert('Fehler beim Hinzufügen der Vitrine');
+      console.error('Fehler beim HinzufÃ¼gen der Vitrine:', error);
+      alert('Fehler beim HinzufÃ¼gen der Vitrine');
     } finally {
       setLoading(false);
     }
@@ -218,14 +212,14 @@ export default function Home() {
         setShowShelfForm(false);
         openShowcaseDetails(selectedShowcase!.id);
         loadStats();
-        alert('Regal erfolgreich hinzugefügt!');
+        alert('Regal erfolgreich hinzugefÃ¼gt!');
       } else {
         const error = await response.text();
         alert('Fehler: ' + error);
       }
     } catch (error) {
-      console.error('Fehler beim Hinzufügen des Regals:', error);
-      alert('Fehler beim Hinzufügen des Regals');
+      console.error('Fehler beim HinzufÃ¼gen des Regals:', error);
+      alert('Fehler beim HinzufÃ¼gen des Regals');
     } finally {
       setLoading(false);
     }
@@ -326,8 +320,6 @@ export default function Home() {
       <Head>
         <title>Mineraliensammlung - Marius Weber</title>
         <meta name="description" content="Entdecken Sie eine faszinierende Sammlung seltener Mineralien und Gesteine." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       {/* Header */}
