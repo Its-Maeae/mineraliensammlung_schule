@@ -124,123 +124,124 @@ export default function Home() {
   };
 
   const openShowcaseDetails = async (id: number) => {
-    try {
-      const response = await fetch(`/api/showcases/${id}`);
-      if (response.ok) {
-        const showcase = await response.json();
-        setSelectedShowcase(showcase);
-        setShowShowcaseModal(true);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Vitrine-Details:', error);
+  try {
+    const response = await fetch(`/api/showcases/${id}`);
+    if (response.ok) {
+      const showcase = await response.json();
+      setSelectedShowcase(showcase);
+      setShowShowcaseModal(true);
     }
-  };
+  } catch (error) {
+    console.error('Fehler beim Laden der Vitrine-Details:', error);
+  }
+};
 
-  const handleVitrineSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+const handleVitrineSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const formData = new FormData();
-      formData.append('name', vitrineFormData.name);
-      formData.append('code', vitrineFormData.code);
-      formData.append('location', vitrineFormData.location);
-      formData.append('description', vitrineFormData.description);
-      
-      if (vitrineImage) {
-        formData.append('image', vitrineImage);
-      }
+  try {
+    const formData = new FormData();
+    formData.append('name', vitrineFormData.name);
+    formData.append('code', vitrineFormData.code);
+    formData.append('location', vitrineFormData.location);
+    formData.append('description', vitrineFormData.description);
+    
+    if (vitrineImage) {
+      formData.append('image', vitrineImage);
+    }
 
-      const response = await fetch('/api/showcases', {
-        method: 'POST',
-        body: formData
+    const response = await fetch('/api/showcases', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      setVitrineFormData({
+        name: '',
+        code: '',
+        location: '',
+        description: ''
       });
-
-      if (response.ok) {
-        setVitrineFormData({
-          name: '',
-          code: '',
-          location: '',
-          description: ''
-        });
-        setVitrineImage(null);
-        setShowVitrineForm(false);
-        loadShowcases();
-        loadStats();
-        alert('Vitrine erfolgreich hinzugefügt!');
-      } else {
-        const error = await response.text();
-        alert('Fehler: ' + error);
-      }
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen der Vitrine:', error);
-      alert('Fehler beim Hinzufügen der Vitrine');
-    } finally {
-      setLoading(false);
+      setVitrineImage(null);
+      setShowVitrineForm(false);
+      loadShowcases();
+      loadStats();
+      alert('Vitrine erfolgreich hinzugefÃ¼gt!');
+    } else {
+      const error = await response.text();
+      alert('Fehler: ' + error);
     }
-  };
+  } catch (error) {
+    console.error('Fehler beim HinzufÃ¼gen der Vitrine:', error);
+    alert('Fehler beim HinzufÃ¼gen der Vitrine');
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleShelfSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+const handleShelfSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const formData = new FormData();
-      formData.append('name', shelfFormData.name);
-      formData.append('code', shelfFormData.code);
-      formData.append('description', shelfFormData.description);
-      formData.append('position_order', shelfFormData.position_order.toString());
-      formData.append('showcase_id', selectedShowcase!.id.toString());
-      
-      if (shelfImage) {
-        formData.append('image', shelfImage);
-      }
+  try {
+    const formData = new FormData();
+    formData.append('name', shelfFormData.name);
+    formData.append('code', shelfFormData.code);
+    formData.append('description', shelfFormData.description);
+    formData.append('position_order', shelfFormData.position_order.toString());
+    formData.append('showcase_id', selectedShowcase!.id.toString());
+    
+    if (shelfImage) {
+      formData.append('image', shelfImage);
+    }
 
-      const response = await fetch('/api/shelves', {
-        method: 'POST',
-        body: formData
+    const response = await fetch('/api/shelves', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      setShelfFormData({
+        name: '',
+        code: '',
+        description: '',
+        position_order: 0
       });
-
-      if (response.ok) {
-        setShelfFormData({
-          name: '',
-          code: '',
-          description: '',
-          position_order: 0
-        });
-        setShelfImage(null);
-        setShowShelfForm(false);
-        openShowcaseDetails(selectedShowcase!.id);
-        loadStats();
-        alert('Regal erfolgreich hinzugefügt!');
-      } else {
-        const error = await response.text();
-        alert('Fehler: ' + error);
-      }
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen des Regals:', error);
-      alert('Fehler beim Hinzufügen des Regals');
-    } finally {
-      setLoading(false);
+      setShelfImage(null);
+      setShowShelfForm(false);
+      // Vitrine Details neu laden
+      openShowcaseDetails(selectedShowcase!.id);
+      loadStats();
+      alert('Regal erfolgreich hinzugefÃ¼gt!');
+    } else {
+      const error = await response.text();
+      alert('Fehler: ' + error);
     }
-  };
+  } catch (error) {
+    console.error('Fehler beim HinzufÃ¼gen des Regals:', error);
+    alert('Fehler beim HinzufÃ¼gen des Regals');
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const openShelfDetails = async (shelfId: number) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/shelves/${shelfId}/minerals`);
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedShelf(data.shelfInfo);
-        setShelfMinerals(data.minerals);
-        setShowShelfMineralsModal(true);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Regal-Details:', error);
-    } finally {
-      setLoading(false);
+const openShelfDetails = async (shelfId: number) => {
+  try {
+    setLoading(true);
+    const response = await fetch(`/api/shelves/${shelfId}/minerals`);
+    if (response.ok) {
+      const data = await response.json();
+      setSelectedShelf(data.shelfInfo);
+      setShelfMinerals(data.minerals);
+      setShowShelfMineralsModal(true);
     }
-  };
+  } catch (error) {
+    console.error('Fehler beim Laden der Regal-Details:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (currentPage === 'collection') {
@@ -320,6 +321,8 @@ export default function Home() {
       <Head>
         <title>Mineraliensammlung - Marius Weber</title>
         <meta name="description" content="Entdecken Sie eine faszinierende Sammlung seltener Mineralien und Gesteine." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       {/* Header */}
@@ -327,7 +330,7 @@ export default function Home() {
         <div className="container">
           <div className="header-content">
             <div className="logo">
-              <div className="logo-icon">💎</div>
+              <div className="logo-icon">ðŸ’Ž</div>
               <div className="logo-text">
                 <span className="logo-title">Mineralien</span>
                 <span className="logo-subtitle">Sammlung Marius</span>
@@ -394,8 +397,8 @@ export default function Home() {
                     <span className="hero-highlight"> Mineralien</span>
                   </h1>
                   <p className="hero-description">
-                    Entdecken Sie eine außergewöhnliche Sammlung seltener Mineralien und Gesteine. 
-                    Jedes Exemplar erzählt eine millionenjährige Geschichte der Erdgeschichte.
+                    Entdecken Sie eine auÃŸergewÃ¶hnliche Sammlung seltener Mineralien und Gesteine. 
+                    Jedes Exemplar erzÃ¤hlt eine millionenjÃ¤hrige Geschichte der Erdgeschichte.
                   </p>
                   <div className="hero-buttons">
                     <button className="btn btn-primary" onClick={() => showPage('collection')}>
@@ -408,12 +411,12 @@ export default function Home() {
                 </div>
                 
                 <div className="hero-visual">
-                  <div className="hero-crystal">💎</div>
+                  <div className="hero-crystal">ðŸ’Ž</div>
                   <div className="hero-particles">
-                    <span className="particle">✨</span>
-                    <span className="particle">🔬</span>
-                    <span className="particle">⭐</span>
-                    <span className="particle">💫</span>
+                    <span className="particle">âœ¨</span>
+                    <span className="particle">ðŸ”¬</span>
+                    <span className="particle">â­</span>
+                    <span className="particle">ðŸ’«</span>
                   </div>
                 </div>
               </div>
@@ -455,7 +458,7 @@ export default function Home() {
                 
                 <div className="features-grid">
                   <div className="feature-card">
-                    <div className="feature-icon">🔍</div>
+                    <div className="feature-icon">ðŸ”</div>
                     <h3 className="feature-title">Intelligente Suche</h3>
                     <p className="feature-description">
                       Suchen Sie nach Namen, Steinnummer oder Eigenschaften. 
@@ -464,8 +467,8 @@ export default function Home() {
                   </div>
                   
                   <div className="feature-card">
-                    <div className="feature-icon">🎯</div>
-                    <h3 className="feature-title">Präzise Filter</h3>
+                    <div className="feature-icon">ðŸŽ¯</div>
+                    <h3 className="feature-title">PrÃ¤zise Filter</h3>
                     <p className="feature-description">
                       Filtern Sie nach Farbe, Fundort, Gesteinsart oder Standort. 
                       Finden Sie genau das gesuchte Mineral.
@@ -473,11 +476,11 @@ export default function Home() {
                   </div>
                   
                   <div className="feature-card">
-                    <div className="feature-icon">📊</div>
+                    <div className="feature-icon">ðŸ“Š</div>
                     <h3 className="feature-title">Detaillierte Dokumentation</h3>
                     <p className="feature-description">
                       Jedes Mineral ist wissenschaftlich dokumentiert mit 
-                      Herkunft, Eigenschaften und hochauflösenden Bildern.
+                      Herkunft, Eigenschaften und hochauflÃ¶senden Bildern.
                     </p>
                   </div>
                 </div>
@@ -489,29 +492,29 @@ export default function Home() {
               <div className="container">
                 <div className="about-content">
                   <div className="about-text">
-                    <h2 className="about-title">Über die Sammlung</h2>
+                    <h2 className="about-title">Ãœber die Sammlung</h2>
                     <p className="about-description">
                       Diese private Mineraliensammlung ist das Ergebnis jahrelanger 
-                      Leidenschaft für Geologie und Mineralogie. Jedes Exemplar wurde 
-                      sorgfältig ausgewählt und dokumentiert.
+                      Leidenschaft fÃ¼r Geologie und Mineralogie. Jedes Exemplar wurde 
+                      sorgfÃ¤ltig ausgewÃ¤hlt und dokumentiert.
                     </p>
                     <p className="about-description">
-                      Von glänzenden Kristallen bis hin zu seltenen geologischen 
-                      Formationen - entdecken Sie die Schönheit und Vielfalt 
+                      Von glÃ¤nzenden Kristallen bis hin zu seltenen geologischen 
+                      Formationen - entdecken Sie die SchÃ¶nheit und Vielfalt 
                       unserer Erde in ihrer reinsten Form.
                     </p>
                   </div>
                   
                   <div className="about-visual">
                     <div className="about-card">
-                      <div className="about-card-icon">🌍</div>
+                      <div className="about-card-icon">ðŸŒ</div>
                       <h4>Weltweite Fundorte</h4>
                       <p>Mineralien aus allen Kontinenten</p>
                     </div>
                     <div className="about-card">
-                      <div className="about-card-icon">🔬</div>
+                      <div className="about-card-icon">ðŸ”¬</div>
                       <h4>Wissenschaftlich dokumentiert</h4>
-                      <p>Präzise Katalogisierung</p>
+                      <p>PrÃ¤zise Katalogisierung</p>
                     </div>
                   </div>
                 </div>
@@ -586,7 +589,7 @@ export default function Home() {
                     {rockTypeFilter && <span className="filter-tag">Gesteinsart: {rockTypeFilter}</span>}
                   </div>
                   <button className="clear-filters" onClick={clearFilters}>
-                    Filter zurücksetzen
+                    Filter zurÃ¼cksetzen
                   </button>
                 </div>
               )}
@@ -620,7 +623,7 @@ export default function Home() {
                         {mineral.image_path ? (
                           <img src={`/uploads/${mineral.image_path}`} alt={mineral.name} />
                         ) : (
-                          <div className="placeholder">📸</div>
+                          <div className="placeholder">ðŸ“¸</div>
                         )}
                       </div>
                       <div className="mineral-info">
@@ -651,7 +654,7 @@ export default function Home() {
                     <button 
                       className="btn btn-primary"
                       onClick={() => setShowVitrineForm(true)}>
-                        Neue Vitrine hinzufügen
+                        Neue Vitrine hinzufÃ¼gen
                     </button>
                   )}
                 </div>
@@ -662,8 +665,8 @@ export default function Home() {
                   <div className="loading">Lade Vitrinen...</div>
                 ) : showcases.length === 0 ? (
                   <div className="no-showcases">
-                    <h3>🛍️ Noch keine Vitrinen vorhanden</h3>
-                    <p>Fügen Sie Ihre erste Vitrine hinzu, um Ihre Sammlung zu organisieren.</p>
+                    <h3>ðŸ›ï¸ Noch keine Vitrinen vorhanden</h3>
+                    <p>FÃ¼gen Sie Ihre erste Vitrine hinzu, um Ihre Sammlung zu organisieren.</p>
                   </div>
                 ) : (
                   showcases.map(showcase => (
@@ -676,7 +679,7 @@ export default function Home() {
                         {showcase.image_path ? (
                           <img src={`/uploads/${showcase.image_path}`} alt={showcase.name} />
                         ) : (
-                          <div className="placeholder">🛍️</div>
+                          <div className="placeholder">ðŸ›ï¸</div>
                         )}
                       </div>
                       <div className="vitrine-info">
@@ -710,7 +713,7 @@ export default function Home() {
             <div className="container">
               <div className="page-header">
                 <h1 className="page-title">Verwaltung</h1>
-                <p className="page-description">Neue Mineralien zur Sammlung hinzufügen</p>
+                <p className="page-description">Neue Mineralien zur Sammlung hinzufÃ¼gen</p>
               </div>
               
               <div className="admin-form-container">
@@ -794,7 +797,7 @@ export default function Home() {
                 </span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Hinzugefügt:</span>
+                <span className="detail-label">HinzugefÃ¼gt:</span>
                 <span className="detail-value">
                   {new Date(selectedMineral.created_at).toLocaleDateString('de-DE')}
                 </span>
@@ -804,7 +807,7 @@ export default function Home() {
             <div style={{ marginTop: '20px' }}>
               <h3>Beschreibung</h3>
               <p style={{ marginTop: '10px', color: '#555', lineHeight: '1.6' }}>
-                {selectedMineral.description || 'Keine Beschreibung verfügbar.'}
+                {selectedMineral.description || 'Keine Beschreibung verfÃ¼gbar.'}
               </p>
             </div>
           </div>
@@ -822,7 +825,7 @@ export default function Home() {
                 className="btn btn-primary"
                 style={{ marginBottom: 'var(--space-4)' }}
                 onClick={() => setShowShelfForm(true)}>
-                  Neues Regal hinzufügen
+                  Neues Regal hinzufÃ¼gen
               </button>
             )}
             
@@ -850,7 +853,7 @@ export default function Home() {
                 <span className="detail-value">{selectedShowcase.mineral_count || 0}</span>
               </div>
               <div className="detail-item">
-                <span className="detail-label">Hinzugefügt:</span>
+                <span className="detail-label">HinzugefÃ¼gt:</span>
                 <span className="detail-value">
                   {new Date(selectedShowcase.created_at).toLocaleDateString('de-DE')}
                 </span>
@@ -923,7 +926,7 @@ export default function Home() {
               <div className="loading">Lade Mineralien...</div>
             ) : shelfMinerals.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--gray-500)' }}>
-                <p>🗳️ Dieses Regal ist noch leer</p>
+                <p>ðŸ—³ï¸ Dieses Regal ist noch leer</p>
                 <p>Keine Mineralien zugeordnet</p>
               </div>
             ) : (
@@ -941,7 +944,7 @@ export default function Home() {
                       {mineral.image_path ? (
                         <img src={`/uploads/${mineral.image_path}`} alt={mineral.name} />
                       ) : (
-                        <div className="placeholder">📸</div>
+                        <div className="placeholder">ðŸ“¸</div>
                       )}
                     </div>
                     <div className="mineral-info-small">
@@ -965,7 +968,7 @@ export default function Home() {
               setShowVitrineForm(false);
               setVitrineImage(null);
             }}>&times;</span>
-            <h2>Neue Vitrine hinzufügen</h2>
+            <h2>Neue Vitrine hinzufÃ¼gen</h2>
             
             <form onSubmit={handleVitrineSubmit}>
               <div className="form-group">
@@ -1024,7 +1027,7 @@ export default function Home() {
                 />
                 {vitrineImage && (
                   <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--gray-600)' }}>
-                    Ausgewählt: {vitrineImage.name}
+                    AusgewÃ¤hlt: {vitrineImage.name}
                   </div>
                 )}
               </div>
@@ -1045,13 +1048,14 @@ export default function Home() {
                   className="btn btn-primary"
                   disabled={loading}
                 >
-                  {loading ? 'Wird hinzugefügt...' : 'Vitrine hinzufügen'}
+                  {loading ? 'Wird hinzugefÃ¼gt...' : 'Vitrine hinzufÃ¼gen'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
 
       {/* Shelf Form Modal */}
       {showShelfForm && selectedShowcase && (
@@ -1061,7 +1065,7 @@ export default function Home() {
               setShowShelfForm(false);
               setShelfImage(null);
             }}>&times;</span>
-            <h2>Neues Regal für {selectedShowcase.name} hinzufügen</h2>
+            <h2>Neues Regal fÃ¼r {selectedShowcase.name} hinzufÃ¼gen</h2>
             
             <form onSubmit={handleShelfSubmit}>
               <div className="form-group">
@@ -1087,7 +1091,7 @@ export default function Home() {
                   required
                 />
                 <small style={{ color: 'var(--gray-600)', fontSize: 'var(--font-size-sm)' }}>
-                  Vollständiger Code wird: {selectedShowcase.code}-{shelfFormData.code}
+                  VollstÃ¤ndiger Code wird: {selectedShowcase.code}-{shelfFormData.code}
                 </small>
               </div>
 
@@ -1127,7 +1131,7 @@ export default function Home() {
                 />
                 {shelfImage && (
                   <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--gray-600)' }}>
-                    Ausgewählt: {shelfImage.name}
+                    AusgewÃ¤hlt: {shelfImage.name}
                   </div>
                 )}
               </div>
@@ -1148,13 +1152,1315 @@ export default function Home() {
                   className="btn btn-primary"
                   disabled={loading}
                 >
-                  {loading ? 'Wird hinzugefügt...' : 'Regal hinzufügen'}
+                  {loading ? 'Wird hinzugefÃ¼gt...' : 'Regal hinzufÃ¼gen'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        :root {
+          --primary-color: #1e40af;
+          --primary-light: #3b82f6;
+          --primary-dark: #1e3a8a;
+          --secondary-color: #64748b;
+          --accent-color: #0ea5e9;
+          --success-color: #10b981;
+          --warning-color: #f59e0b;
+          --error-color: #ef4444;
+          
+          --white: #ffffff;
+          --gray-50: #f8fafc;
+          --gray-100: #f1f5f9;
+          --gray-200: #e2e8f0;
+          --gray-300: #cbd5e1;
+          --gray-400: #94a3b8;
+          --gray-500: #64748b;
+          --gray-600: #475569;
+          --gray-700: #334155;
+          --gray-800: #1e293b;
+          --gray-900: #0f172a;
+          
+          --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          --font-size-xs: 0.75rem;
+          --font-size-sm: 0.875rem;
+          --font-size-base: 1rem;
+          --font-size-lg: 1.125rem;
+          --font-size-xl: 1.25rem;
+          --font-size-2xl: 1.5rem;
+          --font-size-3xl: 1.875rem;
+          --font-size-4xl: 2.25rem;
+          --font-size-5xl: 3rem;
+          
+          --space-1: 0.25rem;
+          --space-2: 0.5rem;
+          --space-3: 0.75rem;
+          --space-4: 1rem;
+          --space-5: 1.25rem;
+          --space-6: 1.5rem;
+          --space-8: 2rem;
+          --space-10: 2.5rem;
+          --space-12: 3rem;
+          --space-16: 4rem;
+          --space-20: 5rem;
+          
+          --radius-sm: 0.375rem;
+          --radius-md: 0.5rem;
+          --radius-lg: 0.75rem;
+          --radius-xl: 1rem;
+          --radius-2xl: 1.5rem;
+          
+          --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+          --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+          --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+          --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+          
+          --transition-fast: 0.15s ease;
+          --transition-normal: 0.3s ease;
+          --transition-slow: 0.5s ease;
+          
+          --container-max-width: 1200px;
+          --header-height: 80px;
+        }
+
+        html {
+          scroll-behavior: smooth;
+        }
+
+        body {
+          font-family: var(--font-family);
+          font-size: var(--font-size-base);
+          line-height: 1.6;
+          color: var(--gray-800);
+          background-color: var(--gray-50);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+          max-width: var(--container-max-width);
+          margin: 0 auto;
+          padding: 0 var(--space-4);
+        }
+
+        /* Header Styles */
+        .header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid var(--gray-200);
+          height: var(--header-height);
+          transition: all var(--transition-normal);
+        }
+
+        .header-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: var(--header-height);
+        }
+
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          text-decoration: none;
+          color: var(--gray-900);
+        }
+
+        .logo-icon {
+          font-size: var(--font-size-2xl);
+          background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .logo-text {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .logo-title {
+          font-size: var(--font-size-lg);
+          font-weight: 700;
+          color: var(--gray-900);
+          line-height: 1.2;
+        }
+
+        .logo-subtitle {
+          font-size: var(--font-size-sm);
+          color: var(--gray-600);
+          font-weight: 500;
+        }
+
+        .nav {
+          display: flex;
+          align-items: center;
+          gap: var(--space-8);
+        }
+
+        .nav-link {
+          position: relative;
+          color: var(--gray-600);
+          text-decoration: none;
+          font-weight: 500;
+          font-size: var(--font-size-sm);
+          padding: var(--space-2) var(--space-4);
+          border-radius: var(--radius-md);
+          transition: all var(--transition-fast);
+          cursor: pointer;
+        }
+
+        .nav-link:hover {
+          color: var(--primary-color);
+          background-color: var(--gray-100);
+        }
+
+        .nav-link.active {
+          color: var(--primary-color);
+          background-color: rgba(30, 64, 175, 0.1);
+        }
+
+        .nav-link.active::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: var(--space-4);
+          right: var(--space-4);
+          height: 2px;
+          background: var(--primary-color);
+          border-radius: 1px;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-toggle {
+          display: none;
+          flex-direction: column;
+          cursor: pointer;
+          padding: var(--space-2);
+          gap: var(--space-1);
+        }
+
+        .mobile-menu-toggle span {
+          width: 24px;
+          height: 2px;
+          background: var(--gray-700);
+          border-radius: 1px;
+          transition: all var(--transition-fast);
+        }
+
+        .mobile-nav {
+          display: none;
+          position: fixed;
+          top: var(--header-height);
+          left: 0;
+          right: 0;
+          background: var(--white);
+          border-bottom: 1px solid var(--gray-200);
+          box-shadow: var(--shadow-lg);
+          z-index: 999;
+        }
+
+        .mobile-nav.active {
+          display: block;
+        }
+
+        .mobile-nav-link {
+          display: block;
+          padding: var(--space-4);
+          color: var(--gray-700);
+          text-decoration: none;
+          font-weight: 500;
+          border-bottom: 1px solid var(--gray-100);
+          transition: all var(--transition-fast);
+          cursor: pointer;
+        }
+
+        .mobile-nav-link:hover {
+          background-color: var(--gray-50);
+          color: var(--primary-color);
+        }
+
+        /* Main Content */
+        main {
+          margin-top: var(--header-height);
+        }
+
+        .page {
+          display: none;
+          min-height: calc(100vh - var(--header-height));
+        }
+
+        .page.active {
+          display: block;
+          animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .page-header {
+          padding: var(--space-16) 0 var(--space-12);
+          text-align: center;
+        }
+
+        .page-header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          text-align: left;
+        }
+
+        .page-title {
+          font-size: var(--font-size-4xl);
+          font-weight: 700;
+          color: var(--gray-900);
+          margin-bottom: var(--space-4);
+          line-height: 1.1;
+        }
+
+        .page-description {
+          font-size: var(--font-size-lg);
+          color: var(--gray-600);
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero {
+          background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+          color: var(--white);
+          padding: var(--space-20) 0;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .hero-content {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: var(--space-16);
+          align-items: center;
+        }
+
+        .hero-title {
+          font-size: var(--font-size-5xl);
+          font-weight: 700;
+          line-height: 1.1;
+          margin-bottom: var(--space-6);
+        }
+
+        .hero-highlight {
+          background: linear-gradient(135deg, #60a5fa, #34d399);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .hero-description {
+          font-size: var(--font-size-lg);
+          line-height: 1.6;
+          margin-bottom: var(--space-8);
+          opacity: 0.9;
+        }
+
+        .hero-buttons {
+          display: flex;
+          gap: var(--space-4);
+          flex-wrap: wrap;
+        }
+
+        .hero-visual {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .hero-crystal {
+          font-size: 8rem;
+          animation: float 6s ease-in-out infinite;
+          filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+
+        .hero-particles {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+
+        .particle {
+          position: absolute;
+          font-size: var(--font-size-2xl);
+          opacity: 0.7;
+          animation: sparkle 4s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { top: 60%; right: 15%; animation-delay: 1s; }
+        .particle:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 2s; }
+        .particle:nth-child(4) { top: 10%; right: 30%; animation-delay: 3s; }
+
+        @keyframes sparkle {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Buttons */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: var(--space-3) var(--space-6);
+          font-size: var(--font-size-sm);
+          font-weight: 600;
+          border: none;
+          border-radius: var(--radius-lg);
+          cursor: pointer;
+          text-decoration: none;
+          transition: all var(--transition-fast);
+          line-height: 1;
+          gap: var(--space-2);
+        }
+
+        .btn-primary {
+          background: var(--primary-color);
+          color: var(--white);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+          background: var(--primary-dark);
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+          background: var(--white);
+          color: var(--primary-color);
+          border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+          background: var(--primary-color);
+          color: var(--white);
+          transform: translateY(-1px);
+        }
+
+        .btn-large {
+          padding: var(--space-4) var(--space-8);
+          font-size: var(--font-size-base);
+        }
+
+        /* Statistics Section */
+        .stats-section {
+          padding: var(--space-20) 0;
+          background: var(--white);
+        }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: var(--space-6);
+        }
+
+        .stat-card {
+          background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+          color: var(--white);
+          padding: var(--space-8);
+          border-radius: var(--radius-xl);
+          text-align: center;
+          box-shadow: var(--shadow-lg);
+          transition: transform var(--transition-normal);
+        }
+
+        .stat-card:hover {
+          transform: translateY(-4px);
+        }
+
+        .stat-number {
+          font-size: var(--font-size-4xl);
+          font-weight: 700;
+          margin-bottom: var(--space-2);
+          display: block;
+        }
+
+        .stat-label {
+          font-size: var(--font-size-lg);
+          opacity: 0.9;
+          font-weight: 500;
+        }
+
+        /* Features Section */
+        .features-section {
+          padding: var(--space-20) 0;
+          background: var(--gray-50);
+        }
+
+        .section-header {
+          text-align: center;
+          margin-bottom: var(--space-16);
+        }
+
+        .section-title {
+          font-size: var(--font-size-3xl);
+          font-weight: 700;
+          color: var(--gray-900);
+          margin-bottom: var(--space-4);
+        }
+
+        .section-description {
+          font-size: var(--font-size-lg);
+          color: var(--gray-600);
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: var(--space-8);
+        }
+
+        .feature-card {
+          background: var(--white);
+          padding: var(--space-8);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--gray-200);
+          transition: all var(--transition-normal);
+          text-align: center;
+        }
+
+        .feature-card:hover {
+          box-shadow: var(--shadow-lg);
+          transform: translateY(-4px);
+          border-color: var(--primary-color);
+        }
+
+        .feature-icon {
+          font-size: var(--font-size-4xl);
+          margin-bottom: var(--space-4);
+          display: block;
+        }
+
+        .feature-title {
+          font-size: var(--font-size-xl);
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-3);
+        }
+
+        .feature-description {
+          color: var(--gray-600);
+          line-height: 1.6;
+        }
+
+        /* About Section */
+        .about-section {
+          padding: var(--space-20) 0;
+          background: var(--white);
+        }
+
+        .about-content {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: var(--space-16);
+          align-items: center;
+        }
+
+        .about-title {
+          font-size: var(--font-size-3xl);
+          font-weight: 700;
+          color: var(--gray-900);
+          margin-bottom: var(--space-6);
+        }
+
+        .about-description {
+          font-size: var(--font-size-lg);
+          color: var(--gray-600);
+          line-height: 1.7;
+          margin-bottom: var(--space-4);
+        }
+
+        .about-visual {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-4);
+        }
+
+        .about-card {
+          background: var(--gray-50);
+          padding: var(--space-6);
+          border-radius: var(--radius-lg);
+          text-align: center;
+          border: 1px solid var(--gray-200);
+        }
+
+        .about-card-icon {
+          font-size: var(--font-size-2xl);
+          margin-bottom: var(--space-3);
+        }
+
+        .about-card h4 {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-2);
+        }
+
+        .about-card p {
+          color: var(--gray-600);
+          font-size: var(--font-size-sm);
+        }
+
+        /* Search and Filter */
+        .search-filter-container {
+          background: var(--white);
+          border-radius: var(--radius-xl);
+          padding: var(--space-6);
+          margin-bottom: var(--space-6);
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--gray-200);
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: var(--space-8);
+        }
+
+        .search-section h3,
+        .filter-section h3 {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-4);
+        }
+
+        .search-input {
+          width: 100%;
+          padding: var(--space-3) var(--space-4);
+          border: 2px solid var(--gray-200);
+          border-radius: var(--radius-lg);
+          font-size: var(--font-size-base);
+          transition: border-color var(--transition-fast);
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .filter-section {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: var(--space-4);
+          align-items: end;
+        }
+
+        .filter-section h3 {
+          grid-column: 1 / -1;
+          margin-bottom: var(--space-2);
+        }
+
+        .filter-select {
+          padding: var(--space-3) var(--space-4);
+          border: 2px solid var(--gray-200);
+          border-radius: var(--radius-lg);
+          font-size: var(--font-size-sm);
+          background: var(--white);
+          transition: border-color var(--transition-fast);
+        }
+
+        .filter-select:focus {
+          outline: none;
+          border-color: var(--primary-color);
+        }
+
+        .filter-info {
+          background: rgba(30, 64, 175, 0.1);
+          border: 1px solid rgba(30, 64, 175, 0.2);
+          color: var(--primary-dark);
+          padding: var(--space-4);
+          border-radius: var(--radius-lg);
+          margin-bottom: var(--space-4);
+          display: none;
+          align-items: center;
+          gap: var(--space-4);
+          flex-wrap: wrap;
+        }
+
+        .filter-info.show {
+          display: flex;
+        }
+
+        .filter-tag {
+          background: var(--primary-color);
+          color: var(--white);
+          padding: var(--space-1) var(--space-3);
+          border-radius: var(--radius-md);
+          font-size: var(--font-size-xs);
+          font-weight: 500;
+        }
+
+        .clear-filters {
+          background: var(--error-color);
+          color: var(--white);
+          border: none;
+          padding: var(--space-2) var(--space-4);
+          border-radius: var(--radius-md);
+          font-size: var(--font-size-xs);
+          font-weight: 500;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .clear-filters:hover {
+          background: #dc2626;
+        }
+
+        .sort-section {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-3);
+          margin-bottom: var(--space-8);
+          padding: var(--space-4);
+          background: var(--white);
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--gray-200);
+        }
+
+        .sort-section label {
+          font-weight: 500;
+          color: var(--gray-700);
+        }
+
+        .sort-section select {
+          padding: var(--space-2) var(--space-4);
+          border: 1px solid var(--gray-300);
+          border-radius: var(--radius-md);
+          background: var(--white);
+        }
+
+        /* Grid Layouts */
+        .minerals-grid,
+        .vitrines-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: var(--space-6);
+          padding: var(--space-4) 0;
+        }
+
+        .mineral-card,
+        .vitrine-card {
+          background: var(--white);
+          border-radius: var(--radius-xl);
+          overflow: hidden;
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--gray-200);
+          transition: all var(--transition-normal);
+          cursor: pointer;
+        }
+
+        .mineral-card:hover,
+        .vitrine-card:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-xl);
+          border-color: var(--primary-color);
+        }
+
+        .mineral-image,
+        .vitrine-image {
+          width: 100%;
+          height: 200px;
+          background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 3rem;
+          color: var(--white);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .mineral-image img,
+        .vitrine-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform var(--transition-normal);
+        }
+
+        .mineral-card:hover .mineral-image img,
+        .vitrine-card:hover .vitrine-image img {
+          transform: scale(1.05);
+        }
+
+        .mineral-info,
+        .vitrine-info {
+          padding: var(--space-6);
+        }
+
+        .mineral-info h3,
+        .vitrine-info h3 {
+          font-size: var(--font-size-xl);
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-3);
+        }
+
+        .mineral-info p,
+        .vitrine-info p {
+          font-size: var(--font-size-sm);
+          color: var(--gray-600);
+          margin-bottom: var(--space-2);
+          line-height: 1.5;
+        }
+
+        .mineral-info p strong,
+        .vitrine-info p strong {
+          color: var(--gray-800);
+          font-weight: 600;
+        }
+
+        .loading {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: var(--space-20);
+          font-size: var(--font-size-lg);
+          color: var(--gray-500);
+        }
+
+        /* Vitrine Stats */
+        .vitrine-stats {
+          display: flex;
+          justify-content: space-between;
+          margin-top: var(--space-4);
+          padding-top: var(--space-4);
+          border-top: 1px solid var(--gray-200);
+        }
+
+        .vitrine-stat {
+          text-align: center;
+          flex: 1;
+        }
+
+        .vitrine-stat-number {
+          display: block;
+          font-size: var(--font-size-2xl);
+          font-weight: 700;
+          color: var(--primary-color);
+          margin-bottom: var(--space-1);
+        }
+
+        .vitrine-stat-label {
+          font-size: var(--font-size-xs);
+          color: var(--gray-500);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        /* Modal Styles */
+        .modal {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.75);
+          backdrop-filter: blur(4px);
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: var(--space-4);
+        }
+
+        .modal-content {
+          background: var(--white);
+          border-radius: var(--radius-2xl);
+          padding: var(--space-8);
+          max-width: 600px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          position: relative;
+          box-shadow: var(--shadow-xl);
+          animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
+        .close-button {
+          position: absolute;
+          top: var(--space-4);
+          right: var(--space-4);
+          background: var(--gray-100);
+          border: none;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: var(--font-size-xl);
+          color: var(--gray-600);
+          transition: all var(--transition-fast);
+        }
+
+        .close-button:hover {
+          background: var(--gray-200);
+          color: var(--gray-800);
+        }
+
+        .modal h2 {
+          font-size: var(--font-size-2xl);
+          font-weight: 700;
+          color: var(--gray-900);
+          margin-bottom: var(--space-6);
+          padding-right: var(--space-12);
+        }
+
+        /* Detail Views */
+        .detail-info {
+          display: grid;
+          gap: var(--space-4);
+          margin: var(--space-6) 0;
+        }
+
+        .detail-item {
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: var(--space-4);
+          padding: var(--space-4) 0;
+          border-bottom: 1px solid var(--gray-200);
+        }
+
+        .detail-item:last-child {
+          border-bottom: none;
+        }
+
+        .detail-label {
+          font-weight: 600;
+          color: var(--gray-700);
+        }
+
+        .detail-value {
+          color: var(--gray-900);
+        }
+
+        .detail-image {
+          text-align: center;
+          margin: var(--space-6) 0;
+        }
+
+        .detail-image img {
+          max-width: 100%;
+          height: auto;
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-lg);
+        }
+
+        /* Forms */
+        .admin-form-container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: var(--white);
+          border-radius: var(--radius-xl);
+          padding: var(--space-8);
+          box-shadow: var(--shadow-lg);
+          border: 1px solid var(--gray-200);
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+          margin-bottom: var(--space-4);
+        }
+
+        .form-group label {
+          font-size: var(--font-size-sm);
+          font-weight: 600;
+          color: var(--gray-700);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+          padding: var(--space-3) var(--space-4);
+          border: 2px solid var(--gray-200);
+          border-radius: var(--radius-lg);
+          font-size: var(--font-size-base);
+          transition: border-color var(--transition-fast);
+          background: var(--white);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .form-group textarea {
+          min-height: 100px;
+          resize: vertical;
+          font-family: inherit;
+        }
+
+        .no-showcases {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: var(--space-20);
+          color: var(--gray-500);
+        }
+
+        .no-showcases h3 {
+          color: var(--gray-600);
+          margin-bottom: var(--space-4);
+          font-size: var(--font-size-xl);
+        }
+
+        .no-showcases p {
+          margin-bottom: var(--space-6);
+        }
+
+        .placeholder {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          font-size: inherit;
+        }
+
+        .form-group textarea {
+          min-height: 100px;
+          resize: vertical;
+          font-family: inherit;
+        }
+
+        .modal-content form {
+          width: 100%;
+        }
+
+        .form-group {
+          margin-bottom: var(--space-4);
+        }
+
+        .shelf-card.clickable {
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .shelf-card.clickable:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .shelf-image {
+          width: 100%;
+          height: 120px;
+          background: linear-gradient(135deg, var(--gray-400), var(--gray-500));
+          border-radius: var(--radius-md);
+          overflow: hidden;
+          margin-bottom: var(--space-3);
+        }
+
+        .shelf-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform var(--transition-normal);
+        }
+
+        .shelf-card.clickable:hover .shelf-image img {
+          transform: scale(1.05);
+        }
+
+        .shelf-minerals-modal .modal-content {
+          max-width: 1000px;
+          max-height: 90vh;
+        }
+
+        .shelf-minerals-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: var(--space-4);
+          max-height: 60vh;
+          overflow-y: auto;
+          padding: var(--space-2);
+        }
+
+        .mineral-card-small {
+          background: var(--white);
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--gray-200);
+          transition: all var(--transition-normal);
+          cursor: pointer;
+          display: flex;
+          gap: var(--space-3);
+          padding: var(--space-3);
+        }
+
+        .mineral-card-small:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+          border-color: var(--primary-color);
+        }
+
+        .mineral-image-small {
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+          border-radius: var(--radius-md);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          color: var(--white);
+          flex-shrink: 0;
+          overflow: hidden;
+        }
+
+        .mineral-image-small img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform var(--transition-normal);
+        }
+
+        .mineral-card-small:hover .mineral-image-small img {
+          transform: scale(1.1);
+        }
+
+        .mineral-info-small {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .mineral-info-small h4 {
+          font-size: var(--font-size-base);
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-2);
+          line-height: 1.2;
+        }
+
+        .mineral-info-small p {
+          font-size: var(--font-size-sm);
+          color: var(--gray-600);
+          margin-bottom: var(--space-1);
+          line-height: 1.3;
+        }
+
+        .mineral-info-small p strong {
+          color: var(--gray-800);
+          font-weight: 600;
+        }
+
+        /* Mobile Anpassungen */
+        @media (max-width: 768px) {
+          .shelf-minerals-modal .modal-content {
+            margin: var(--space-2);
+            max-height: calc(100vh - 1rem);
+          }
+          
+          .shelf-minerals-grid {
+            grid-template-columns: 1fr;
+            max-height: 50vh;
+          }
+          
+          .mineral-card-small {
+            padding: var(--space-2);
+            gap: var(--space-2);
+          }
+          
+          .mineral-image-small {
+            width: 60px;
+            height: 60px;
+          }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+          .mobile-menu-toggle {
+            display: flex;
+          }
+
+          .nav {
+            display: none;
+          }
+
+          .hero-content {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: var(--space-8);
+          }
+
+          .about-content {
+            grid-template-columns: 1fr;
+            gap: var(--space-8);
+          }
+
+          .search-filter-container {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+          }
+
+          .filter-section {
+            grid-template-columns: 1fr;
+          }
+
+          .page-header-content {
+            flex-direction: column;
+            gap: var(--space-4);
+            text-align: center;
+          }
+
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .features-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .minerals-grid,
+          .vitrines-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .hero-title {
+            font-size: var(--font-size-3xl);
+          }
+
+          .page-title {
+            font-size: var(--font-size-3xl);
+          }
+
+          .hero-crystal {
+            font-size: 4rem;
+          }
+
+          .modal-content {
+            margin: var(--space-4);
+            max-height: calc(100vh - 2rem);
+          }
+
+          .detail-item {
+            grid-template-columns: 1fr;
+            gap: var(--space-2);
+          }
+        }
+
+        .showcase-modal .modal-content {
+          max-width: 800px;
+          max-height: 90vh;
+        }
+
+        .shelves-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: var(--space-4);
+          margin-top: var(--space-4);
+        }
+
+        .shelf-card {
+          background: var(--gray-50);
+          border: 1px solid var(--gray-200);
+          border-radius: var(--radius-lg);
+          padding: var(--space-4);
+          transition: all var(--transition-fast);
+        }
+
+        .shelf-card:hover {
+          background: var(--gray-100);
+          border-color: var(--primary-color);
+        }
+
+        .shelf-info h4 {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--gray-900);
+          margin-bottom: var(--space-2);
+        }
+
+        .shelf-info p {
+          font-size: var(--font-size-sm);
+          color: var(--gray-600);
+          margin-bottom: var(--space-1);
+          line-height: 1.4;
+        }
+
+        .shelf-info p strong {
+          color: var(--gray-800);
+          font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 var(--space-3);
+          }
+
+          .logo-text {
+            display: none;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .hero-title {
+            font-size: var(--font-size-2xl);
+          }
+
+          .page-title {
+            font-size: var(--font-size-2xl);
+          }
+        }
+      `}</style>
     </>
   );
 }
@@ -1222,19 +2528,20 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
         });
         setImage(null);
         onSuccess();
-        alert('Mineral erfolgreich hinzugefügt!');
+        alert('Mineral erfolgreich hinzugefÃ¼gt!');
       } else {
         const error = await response.text();
         alert('Fehler: ' + error);
       }
     } catch (error) {
-      console.error('Fehler beim Hinzufügen des Minerals:', error);
-      alert('Fehler beim Hinzufügen des Minerals');
+      console.error('Fehler beim HinzufÃ¼gen des Minerals:', error);
+      alert('Fehler beim HinzufÃ¼gen des Minerals');
     } finally {
       setLoading(false);
     }
   };
   
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="form-group">
@@ -1315,7 +2622,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
           id="rock_type"
           value={formData.rock_type}
           onChange={(e) => setFormData({...formData, rock_type: e.target.value})}
-          placeholder="z.B. magmatisch, sedimentär, metamorph"
+          placeholder="z.B. magmatisch, sedimentÃ¤r, metamorph"
           required
         />
       </div>
@@ -1347,7 +2654,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       <button type="submit" disabled={loading} className="btn btn-primary btn-large">
-        {loading ? 'Wird hinzugefügt...' : 'Mineral hinzufügen'}
+        {loading ? 'Wird hinzugefÃ¼gt...' : 'Mineral hinzufÃ¼gen'}
       </button>
     </form>
   );
