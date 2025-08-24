@@ -5,6 +5,7 @@
 }
 
 :root {
+  /* Standard Light Mode Variablen (wie in style.css) */
   --primary-color: #1e40af;
   --primary-light: #3b82f6;
   --primary-dark: #1e3a8a;
@@ -14,6 +15,7 @@
   --warning-color: #f59e0b;
   --error-color: #ef4444;
   
+  /* Light Mode Farben (ursprüngliche Werte) */
   --white: #ffffff;
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
@@ -68,8 +70,9 @@
   --header-height: 80px;
 }
 
-/* Dark Theme */
+/* Dark Theme - nur für [data-theme="dark"] */
 [data-theme="dark"] {
+  /* Invertierte Farben für Dark Mode */
   --white: #1e293b;
   --gray-50: #0f172a;
   --gray-100: #1e293b;
@@ -82,7 +85,7 @@
   --gray-800: #f1f5f9;
   --gray-900: #ffffff;
   
-  /* Anpassungen für bessere Lesbarkeit im Dark Mode */
+  /* Angepasste Primärfarben für bessere Sichtbarkeit im Dark Mode */
   --primary-color: #3b82f6;
   --primary-light: #60a5fa;
   --primary-dark: #2563eb;
@@ -173,7 +176,7 @@ body {
   transform: scale(0.95);
 }
 
-/* Dark mode spezifische Anpassungen */
+/* Dark mode spezifische Anpassungen für Theme Toggle */
 [data-theme="dark"] .theme-toggle {
   color: var(--gray-400);
 }
@@ -183,7 +186,7 @@ body {
   color: var(--primary-light);
 }
 
-/* Hover-Effekte für verschiedene Themes */
+/* Hover-Effekte für Dark Mode */
 [data-theme="dark"] .mineral-card:hover,
 [data-theme="dark"] .vitrine-card:hover,
 [data-theme="dark"] .shelf-card:hover {
