@@ -70,6 +70,12 @@ function runMiddleware(req: any, res: any, fn: any) {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
+  const shelfId = parseInt(id as string);
+
+  // Validierung der ID
+  if (isNaN(shelfId)) {
+    return res.status(400).json({ error: 'Ungültige Regal-ID' });
+  }
 
   if (req.method === 'GET') {
     try {
@@ -81,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         FROM shelves s
         LEFT JOIN showcases sc ON s.showcase_id = sc.id
         WHERE s.id = ?
-      `, [id]);
+      `, [shelfId]);
 
       if (!shelf) {
         return res.status(404).json({ error: 'Regal nicht gefunden' });
@@ -104,8 +110,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { name, code, description, position_order } = (req as any).body;
       const image = (req as any).file;
 
+      console.log('Update Shelf - ID:', shelfId, 'Data:', { name, code, description, position_order });
+
       // Erst das aktuelle Regal laden um die showcase_id zu bekommen
-      const currentShelf = await database.get('SELECT showcase_id FROM shelves WHERE id = ?', [id]);
+      const currentShelf = await database.get('SELECT id, showcase_id FROM shelves WHERE id = ?', [shelfId]);
+      
+      console.log('Current shelf:', currentShelf);
       
       if (!currentShelf) {
         return res.status(404).json({ error: 'Regal nicht gefunden' });
@@ -114,8 +124,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Prüfen ob Code bereits in der Vitrine existiert (ABER das aktuelle Regal ausschließen)
       const existingShelf = await database.get(
         'SELECT id FROM shelves WHERE code = ? AND showcase_id = ? AND id != ?',
-        [code, currentShelf.showcase_id, id]
+        [code, currentShelf.showcase_id, shelfId]
       );
+
+      console.log('Existing shelf check:', existingShelf);
 
       if (existingShelf) {
         return res.status(400).json({ error: 'Regal-Code bereits in dieser Vitrine vorhanden' });
@@ -131,18 +143,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       sql += ` WHERE id = ?`;
-      params.push(id);
+      params.push(shelfId);
+
+      console.log('Update SQL:', sql, 'Params:', params);
 
       const result = await database.run(sql, params);
 
+      console.log('Update result:', result);
+
       if (result.changes === 0) {
-        return res.status(404).json({ error: 'Regal nicht gefunden' });
+        return res.status(404).json({ error: 'Regal konnte nicht aktualisiert werden' });
       }
 
       res.status(200).json({ message: 'Regal erfolgreich aktualisiert' });
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Regals:', error);
-      res.status(500).json({ error: 'Fehler beim Aktualisieren des Regals' });
+      res.status(500).json({ error: 'Fehler beim Aktualisieren des Regals: ' + error.message });
     }
   } else if (req.method === 'DELETE') {
     try {
@@ -151,10 +167,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Erst alle Mineralien von diesem Regal entfernen (shelf_id auf NULL setzen)
-      await database.run('UPDATE minerals SET shelf_id = NULL WHERE shelf_id = ?', [id]);
+      await database.run('UPDATE minerals SET shelf_id = NULL WHERE shelf_id = ?', [shelfId]);
 
       // Dann das Regal löschen
-      const result = await database.run('DELETE FROM shelves WHERE id = ?', [id]);
+      const result = await database.run('DELETE FROM shelves WHERE id = ?', [shelfId]);
 
       if (result.changes === 0) {
         return res.status(404).json({ error: 'Regal nicht gefunden' });
