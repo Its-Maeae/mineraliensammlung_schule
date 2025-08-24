@@ -646,7 +646,7 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                   </h1>
                   <p className="hero-description">
                     Entdecken Sie die umfangreiche Sammlung seltener Mineralien und Gesteine 
-                    des Samuel von Pufendorf Gymnasium Flöha auf interaktive Art.
+                    des Samuel von Pufendorf Gymnasiums Flöha auf eine interaktive Art.
                   </p>
                   <div className="hero-buttons">
                     <button className="btn btn-primary" onClick={() => showPage('collection')}>
@@ -766,6 +766,235 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                 </div>
               </div>
             </div>
+
+            {/* Impressum Page */}
+            {currentPage === 'impressum' && (
+              <section className="page active">
+                <div className="container">
+                  <div className="page-header">
+                    <h1 className="page-title">Impressum</h1>
+                    <p className="page-description">Rechtliche Angaben und Verantwortlichkeiten</p>
+                  </div>
+
+                  <div className="impressum-content">
+                    <div className="impressum-section">
+                      <h2>Verantwortliche Institution</h2>
+                      <div className="contact-info">
+                        <h3>Samuel von Pufendorf Gymnasium Flöha</h3>
+                        <p className="address">
+                          Turnertraße 16<br />
+                          09557 Flöha<br />
+                          Deutschland
+                        </p>
+                        <div className="contact-details">
+                          <p><strong>Telefon:</strong> <a href="tel:+49372943010">03726 58160</a></p>
+                          <p><strong>Homepage:</strong> <a href="https://www.gym-floeha.de" target="_blank" rel="noopener noreferrer">www.gymnasium-floeha.de</a></p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="impressum-section">
+                      <h2>Projektverantwortliche</h2>
+                      <div className="contact-person">
+                        <h3>Marius Schmieder</h3>
+                        <p>Schüler der 10c</p>
+                        <p><strong>E-Mail:</strong> <a href="mailto:#">#</a></p>
+                      </div>
+                    </div>
+
+                    <div className="impressum-section">
+                      <h2>Beteiligte Personen</h2>
+                      <div className="contributors">
+                        <div className="contributor-group">
+                          <h4>Lehrkräfte</h4>
+                          <ul>
+                            <li>Manuela Barthel (Projektleitung)</li>
+                            <li>Roy Sommer (Geologie)</li>
+                          </ul>
+                        </div>
+                        <div className="contributor-group">
+                          <h4>Schüler (Digitalisierung und Bestimmung)</h4>
+                          <ul>
+                            <li>Marius Schmieder(Klasse 10c)</li>
+                            <li>Charlie Espig (Klasse 10c)</li>
+                          </ul>
+                        </div>
+                        <div className="contributor-group">
+                          <h4>Externe Unterstützung</h4>
+                          <ul>
+                            <li>Prof. Dr. Klaus Richter (TU Bergakademie Freiberg)</li>
+                            <li>Mineralogischer Verein Sachsen e.V.</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="impressum-section">
+                      <h2>Sammlung zuletzt bearbeitet</h2>
+                      <div className="last-modified">
+                        <p className="date-display">{stats.last_modified || 'Wird geladen...'}</p>
+                      </div>
+                    </div>
+
+                    <div className="impressum-section">
+                      <h2>Rechtliche Hinweise</h2>
+                      <p>
+                        Diese Website dient ausschließlich Bildungszwecken. Die Sammlung ist Eigentum 
+                        des Samuel von Pufendorf Gymnasiums Flöha. Alle Angaben ohne Gewähr.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Quellen Page */}
+            {currentPage === 'quellen' && (
+              <section className="page active">
+                <div className="container">
+                  <div className="page-header">
+                    <h1 className="page-title">Quellen und Literatur</h1>
+                    <p className="page-description">Verwendete Literatur und wissenschaftliche Quellen</p>
+                  </div>
+
+                  <div className="sources-content">
+                    <div className="source-section">
+                      <h2>Fachliteratur</h2>
+                      <ul className="source-list">
+                        <li>Rösler, H. J. (2008): Lehrbuch der Mineralogie. Deutscher Verlag für Grundstoffindustrie, Leipzig</li>
+                        <li>Okrusch, M. & Matthes, S. (2009): Mineralogie: Eine Einführung in die spezielle Mineralogie, Petrologie und Lagerstättenkunde. Springer Spektrum</li>
+                        <li>Klein, C. & Dutrow, B. (2007): Manual of Mineral Science. John Wiley & Sons</li>
+                        <li>Götze, J. (2012): Einführung in die Angewandte Mineralogie. Springer Spektrum</li>
+                      </ul>
+                    </div>
+
+                    <div className="source-section">
+                      <h2>Online-Datenbanken</h2>
+                      <ul className="source-list">
+                        <li><a href="https://www.mindat.org" target="_blank" rel="noopener noreferrer">Mindat.org - Mineralogische Datenbank</a></li>
+                        <li><a href="https://rruff.info" target="_blank" rel="noopener noreferrer">RRUFF Database - Raman Spektroskopie</a></li>
+                        <li><a href="https://webmineral.com" target="_blank" rel="noopener noreferrer">Webmineral.com - Mineraldatenbank</a></li>
+                      </ul>
+                    </div>
+
+                    <div className="source-section">
+                      <h2>Institutionelle Partner</h2>
+                      <ul className="source-list">
+                        <li>TU Bergakademie Freiberg - Institut für Mineralogie</li>
+                        <li>Museum für Mineralogie und Geologie Dresden</li>
+                        <li>Mineralogischer Verein Sachsen e.V.</li>
+                        <li>Senckenberg Naturhistorische Sammlungen Dresden</li>
+                      </ul>
+                    </div>
+
+                    <div className="source-section">
+                      <h2>Bildquellen</h2>
+                      <p>
+                        Alle Fotografien der Mineralien wurden von Schülern des 
+                        Samuel von Pufendorf Gymnasiums Flöha selbst erstellt. Die Verwendung 
+                        erfolgt ausschließlich zu Bildungszwecken.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Kontakt Page */}
+            {currentPage === 'kontakt' && (
+              <section className="page active">
+                <div className="container">
+                  <div className="page-header">
+                    <h1 className="page-title">Kontakt</h1>
+                    <p className="page-description">Nehmen Sie Kontakt mit uns auf</p>
+                  </div>
+
+                  <div className="contact-content">
+                    <div className="contact-grid">
+                      <div className="contact-main">
+                        <h2>Schulkontakt</h2>
+                        <div className="contact-card">
+                          <h3>Samuel von Pufendorf Gymnasium Flöha</h3>
+                          <div className="contact-details">
+                            <div className="contact-item">
+                              <span className="contact-icon">📍</span>
+                              <div>
+                                <strong>Adresse</strong><br />
+                                Turnerstraße 16<br />
+                                09557 Flöha, Deutschland
+                              </div>
+                            </div>
+                            <div className="contact-item">
+                              <span className="contact-icon">📞</span>
+                              <div>
+                                <strong>Telefon</strong><br />
+                                <a href="tel:+49372943010">03726 58160</a>
+                              </div>
+                            </div>
+                            <div className="contact-item">
+                              <span className="contact-icon">📧</span>
+                              <div>
+                                <strong>E-Mail</strong><br />
+                                <a href="mailto:info@gym-floeha.de">gymnasium-floeha@landkreis-mittelsachsen.de</a>
+                              </div>
+                            </div>
+                            <div className="contact-item">
+                              <span className="contact-icon">🌐</span>
+                              <div>
+                                <strong>Website</strong><br />
+                                <a href="https://www.gym-floeha.de" target="_blank" rel="noopener noreferrer">www.gymnasium-floeha.de</a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="contact-project">
+                        <h2>Projektverantwortliche</h2>
+                        <div className="contact-card">
+                          <h3>Marius Schmieder</h3>
+                          <p>Schüler der Klasse 10c</p>
+                          <div className="contact-details">
+                            <div className="contact-item">
+                              <span className="contact-icon">📧</span>
+                              <div>
+                                <strong>E-Mail</strong><br />
+                                <a href="mailto:#">#</a>
+                              </div>
+                            </div>
+                            <div className="contact-item">
+                              <span className="contact-icon">📞</span>
+                              <div>
+                                <strong>Sprechzeiten</strong><br />
+                                Mo-Fr: 8:00-15:00 Uhr<br />
+                                Nach Vereinbarung
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="contact-section">
+                      <h2>Anfragen zur Mineraliensammlung</h2>
+                      <p>
+                        Für Fragen zur Sammlung, Führungen oder wissenschaftliche Anfragen 
+                        kontaktieren Sie bitte direkt Marius Schmieder oder Charlie Espig. Wir freuen uns 
+                        über Ihr Interesse an unserer Sammlung!
+                      </p>
+                    </div>
+
+                    <div className="contact-section">
+                      <h2>Öffnungszeiten Sammlung</h2>
+                      <div className="opening-hours">
+                        <p><strong>Schulzeit:</strong> Nach Vereinbarung</p>
+                        <p><strong>Tag der offenen Tür:</strong> Jährlich im März</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
           </section>
         )}
 
