@@ -359,13 +359,6 @@ export default function Home() {
               >
                 Verwaltung
               </a>
-              <button 
-                className="theme-toggle"
-                onClick={toggleTheme}
-                title={theme === 'light' ? 'Zu Dark Mode wechseln' : 'Zu Light Mode wechseln'}
-              >
-                {theme === 'light' ? '🌙' : '☀️'}
-              </button>
             </nav>
             
             <div 
@@ -386,16 +379,6 @@ export default function Home() {
         <a className="mobile-nav-link" onClick={() => showPage('vitrines')}>Vitrinen</a>
         <a className="mobile-nav-link" onClick={() => showPage('collection')}>Sammlung</a>
         <a className="mobile-nav-link" onClick={() => showPage('admin')}>Verwaltung</a>
-        <div style={{ padding: 'var(--space-4)', borderTop: '1px solid var(--gray-200)' }}>
-          <button 
-            className="theme-toggle"
-            onClick={toggleTheme}
-            style={{ width: '100%', justifyContent: 'center', fontSize: 'var(--font-size-base)' }}
-            title={theme === 'light' ? 'Zu Dark Mode wechseln' : 'Zu Light Mode wechseln'}
-          >
-            {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
-          </button>
-        </div>
       </div>
 
       <main>
