@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { parse } from 'cookie';
 
-// Diese Funktion nach den anderen imports hinzufügen:
+// Authentifizierungsfunktion
 function checkAuthentication(req: NextApiRequest): boolean {
   try {
     const cookies = parse(req.headers.cookie || '');
@@ -30,7 +30,7 @@ function checkAuthentication(req: NextApiRequest): boolean {
   }
 }
 
-// Multer Konfiguration hinzufügen (gleiche wie oben)
+// Multer Konfiguration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(process.cwd(), 'public/uploads');
@@ -105,47 +105,68 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'PUT') {
     try {
-      // Direkte Authentifizierungsprüfung statt Fetch
       if (!checkAuthentication(req)) {
         return res.status(401).json({ error: 'Nicht authentifiziert' });
       }
 
-      // ... Rest der PUT-Route wie oben beschrieben
+      // Multer Middleware für Bildupload
+      await runMiddleware(req, res, upload.single('image'));
+
+      const { name, code, location, description } = (req as any).body;
+      const image = (req as any).file;
+
+      // Prüfen ob Code bereits von anderer Vitrine verwendet wird
+      const existingShowcase = await database.get(
+        'SELECT id FROM showcases WHERE code = ? AND id != ?',
+        [code, id]
+      );
+
+      if (existingShowcase) {
+        return res.status(400).json({ error: 'Vitrine-Code bereits vorhanden' });
+      }
+
+      // SQL für Update mit oder ohne neues Bild
+      let sql = `UPDATE showcases SET name = ?, code = ?, location = ?, description = ?`;
+      let params = [name, code, location || '', description || ''];
+
+      if (image) {
+        sql += `, image_path = ?`;
+        params.push(image.filename);
+      }
+
+      sql += ` WHERE id = ?`;
+      params.push(id);
+
+      const result = await database.run(sql, params);
+
+      if (result.changes === 0) {
+        return res.status(404).json({ error: 'Vitrine nicht gefunden' });
+      }
+
+      res.status(200).json({ message: 'Vitrine erfolgreich aktualisiert' });
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Vitrine:', error);
       res.status(500).json({ error: 'Fehler beim Aktualisieren der Vitrine' });
     }
   } else if (req.method === 'DELETE') {
     try {
-      // Direkte Authentifizierungsprüfung statt Fetch
       if (!checkAuthentication(req)) {
         return res.status(401).json({ error: 'Nicht authentifiziert' });
       }
 
-      // Vitrine löschen (Regale werden durch CASCADE gelöscht)
-      const result = await database.run('DELETE FROM showcases WHERE id = ?', [id]);
+      // Erst alle Mineralien von Regalen dieser Vitrine entfernen
+      await database.run(`
+        UPDATE minerals 
+        SET shelf_id = NULL 
+        WHERE shelf_id IN (
+          SELECT id FROM shelves WHERE showcase_id = ?
+        )
+      `, [id]);
 
-      if (result.changes === 0) {
-        return res.status(404).json({ error: 'Vitrine nicht gefunden' });
-      }
+      // Dann alle Regale der Vitrine löschen
+      await database.run('DELETE FROM shelves WHERE showcase_id = ?', [id]);
 
-      res.status(200).json({ message: 'Vitrine erfolgreich gelöscht' });
-    } catch (error) {
-      console.error('Fehler beim Löschen der Vitrine:', error);
-      res.status(500).json({ error: 'Fehler beim Löschen der Vitrine' });
-    }
-  } else if (req.method === 'DELETE') {
-    try {
-      // Authentifizierung prüfen
-      const authResponse = await fetch(`${req.headers.origin}/api/auth/check`, {
-        headers: { cookie: req.headers.cookie || '' }
-      });
-      
-      if (!authResponse.ok) {
-        return res.status(401).json({ error: 'Nicht authentifiziert' });
-      }
-
-      // Vitrine löschen (Regale werden durch CASCADE gelöscht)
+      // Schließlich die Vitrine löschen
       const result = await database.run('DELETE FROM showcases WHERE id = ?', [id]);
 
       if (result.changes === 0) {
@@ -163,7 +184,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-// Und am Ende der Datei:
 export const config = {
   api: {
     bodyParser: false,
