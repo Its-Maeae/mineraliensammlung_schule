@@ -52,24 +52,27 @@ export default function Home() {
   const [shelfMinerals, setShelfMinerals] = useState<Mineral[]>([]);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Theme management
+// Theme management - mit proper SSR support
   useEffect(() => {
-    // Load saved theme from localStorage or default to 'light'
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-      // Default to light theme
-      document.documentElement.setAttribute('data-theme', 'light');
+    // Zuerst prüfen ob wir im Browser sind
+    if (typeof window !== 'undefined') {
+      // Load saved theme from localStorage or default to 'light'
+      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const initialTheme = savedTheme || 'light'; // Immer light als default
+      
+      setTheme(initialTheme);
+      document.documentElement.setAttribute('data-theme', initialTheme);
     }
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
+    if (typeof window !== 'undefined') {
+      const newTheme = theme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
   };
 
   useEffect(() => {
