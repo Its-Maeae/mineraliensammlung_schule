@@ -1128,9 +1128,8 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
               <div className="admin-buttons">
                 <button 
                   className="btn btn-primary"
-                  style={{ marginBottom: 'var(--space-4)' }}
                   onClick={() => setShowShelfForm(true)}>
-                    Neues Regal hinzufügen
+                    ➕ Neues Regal hinzufügen
                 </button>
                 <button 
                   className="btn btn-secondary"
