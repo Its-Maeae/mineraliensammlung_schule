@@ -858,8 +858,10 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                 </div>
               </div>
             </div>
+          </section>
+        )}
 
-            {/* Impressum Page */}
+        {/* Impressum Page */}
             {currentPage === 'impressum' && (
               <section className="page active">
                 <div className="container">
@@ -1028,8 +1030,6 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                 </div>
               </section>
             )}
-          </section>
-        )}
 
         {/* Collection Page */}
         {currentPage === 'collection' && (
