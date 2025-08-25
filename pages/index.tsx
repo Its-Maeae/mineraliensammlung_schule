@@ -804,17 +804,6 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                     
                     <div className="impressum-grid">
                       <div className="impressum-card">
-                        <h3>🏫 Bildungseinrichtung</h3>
-                        <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
-                        <p>Turnerstraße 16</p>
-                        <p>09557 Flöha, Deutschland</p>
-                        <p>🌐 <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
-                            gymnasium-floeha.de
-                          </a>
-                        </p>
-                      </div>
-                      
-                      <div className="impressum-card">
                         <h3>👤 Kontaktperson</h3>
                         <p><strong>Marius Schmieder (Digitalisierung)</strong></p>
                         <p>Schüler der 10c</p>
@@ -842,6 +831,17 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                         <p>✉️ <a href="mailto:manuela-bathel@gymnasium-floeha.lernsax.de">
                           manuela-barthel@gymnasium-floeha.lernsax.de
                         </a></p>
+                      </div>
+
+                      <div className="impressum-card">
+                        <h3>🏫 Bildungseinrichtung</h3>
+                        <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
+                        <p>Turnerstraße 16</p>
+                        <p>09557 Flöha, Deutschland</p>
+                        <p>🌐 <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
+                            gymnasium-floeha.de
+                          </a>
+                        </p>
                       </div>
                       
                       <div className="impressum-card">
