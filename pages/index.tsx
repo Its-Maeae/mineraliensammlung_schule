@@ -806,15 +806,8 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                       <div className="impressum-card">
                         <h3>🏫 Bildungseinrichtung</h3>
                         <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
-                        <p>Lessingstraße 1</p>
+                        <p>Turnerstraße 16</p>
                         <p>09557 Flöha, Deutschland</p>
-                      </div>
-                      
-                      <div className="impressum-card">
-                        <h3>👤 Kontaktperson</h3>
-                        <p><strong>Dr. Schmidt</strong></p>
-                        <p>Fachbereich Geologie</p>
-                        <p>📞 03726 123456</p>
                         <p>🌐 <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
                             gymnasium-floeha.de
                           </a>
@@ -822,11 +815,40 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                       </div>
                       
                       <div className="impressum-card">
+                        <h3>👤 Kontaktperson</h3>
+                        <p><strong>Marius Schmieder (Digitalisierung)</strong></p>
+                        <p>Schüler der 10c</p>
+                        <p>📞 03726 123456</p>
+                        <p>✉️ <a href="mailto:marius-schmieder@gymnasium-floeha.lernsax.de">
+                          marius-schmieder@gymnasium-floeha.lernsax.de
+                        </a></p>
+                      </div>
+
+                      <div className="impressum-card">
+                        <h3>👤 Kontaktperson</h3>
+                        <p><strong>Charlie Espig (Bestimmung)</strong></p>
+                        <p>Schüler der 10c</p>
+                        <p>📞 03726 123456</p>
+                        <p>✉️ <a href="mailto:charlie-espig@gymnasium-floeha.lernsax.de">
+                          charlie-espig@gymnasium-floeha.lernsax.de
+                        </a></p>
+                      </div>
+
+                      <div className="impressum-card">
+                        <h3>👤 Kontaktperson</h3>
+                        <p><strong>Manuela Barthel (Projektleitung)</strong></p>
+                        <p>Fachbereich Geologie</p>
+                        <p>📞 03726 123456</p>
+                        <p>✉️ <a href="mailto:manuela-bathel@gymnasium-floeha.lernsax.de">
+                          manuela-barthel@gymnasium-floeha.lernsax.de
+                        </a></p>
+                      </div>
+                      
+                      <div className="impressum-card">
                         <h3>👥 Mitwirkende</h3>
-                        <p>• Dr. Schmidt (Projektleitung)</p>
-                        <p>• Sarah Müller (Digitalisierung)</p>
-                        <p>• Tom Weber (Programmierung)</p>
-                        <p>• Klasse 10a (Katalogisierung)</p>
+                        <p>• Marius Schmieder (Digitalisierung)</p>
+                        <p>• Charlie Espig (Bestimmung)</p>
+                        <p>• Manuela Barthel (Projektleitung)</p>
                       </div>
                       
                       <div className="impressum-card">
@@ -874,21 +896,21 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                     <div className="legal-section">
                       <h2>Angaben gemäß § 5 TMG</h2>
                       <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
-                      <p>Lessingstraße 1<br/>
+                      <p>Turnerstraße 16<br/>
                         09557 Flöha<br/>
                         Deutschland</p>
                     </div>
                     
                     <div className="legal-section">
                       <h2>Vertreten durch</h2>
-                      <p>Schulleitung: Frau Direktor Weber<br/>
-                        Fachbereich Geologie: Dr. Schmidt</p>
+                      <p>Schulleitung: Frau Noack<br/>
+                        Fachbereich Geologie: Herr Sommer</p>
                     </div>
                     
                     <div className="legal-section">
                       <h2>Kontakt</h2>
-                      <p>Telefon: 03726 123456<br/>
-                        E-Mail: info@gymnasium-floeha.de<br/>
+                      <p>Telefon: 03726 58160<br/>
+                        E-Mail: gymnasium-floeha@landkreis-mittelsachsen.de<br/>
                         Internet: www.gymnasium-floeha.de</p>
                     </div>
                     
@@ -971,26 +993,25 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                       <div className="contact-card">
                         <h3>🏫 Schuladresse</h3>
                         <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
-                        <p>Lessingstraße 1<br/>
+                        <p>Turnerstraße 16<br/>
                           09557 Flöha<br/>
                           Deutschland</p>
-                        <p>📞 <strong>03726 123456</strong></p>
-                        <p>📠 03726 123457</p>
+                        <p>📞 <strong>03726 58160</strong></p>
                       </div>
                       
                       <div className="contact-card">
                         <h3>👤 Ansprechpartner</h3>
-                        <p><strong>Dr. Schmidt</strong><br/>
+                        <p><strong>Frau Barthel</strong><br/>
                           Fachbereich Geologie</p>
-                        <p>📧 schmidt@gymnasium-floeha.de</p>
+                        <p>📧 manuela-barthel@gymnasium-floeha.lernsax.de</p>
                         <p>🕒 Sprechzeiten: Mo-Fr 8:00-15:00</p>
                       </div>
                       
                       <div className="contact-card">
                         <h3>💻 Technischer Support</h3>
-                        <p><strong>Tom Weber</strong><br/>
-                          IT-Administration</p>
-                        <p>📧 it-support@gymnasium-floeha.de</p>
+                        <p><strong>Marius Schmieder</strong><br/>
+                          Schüler Klasse 10c</p>
+                        <p>📧 marius-schmieder@gymnasium-floeha.lernsax.de</p>
                         <p>🔧 Bei technischen Problemen mit der Website</p>
                       </div>
                       
