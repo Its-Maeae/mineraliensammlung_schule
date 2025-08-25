@@ -54,6 +54,7 @@ export default function Home() {
   const [editFormData, setEditFormData] = useState<any>({});
   const [editImage, setEditImage] = useState<File | null>(null);
   const [shelves, setShelves] = useState<any[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<string>('');
 
   useEffect(() => {
     loadStats();
@@ -68,6 +69,21 @@ export default function Home() {
   useEffect(() => {
     loadShelves();
   }, []);
+
+  const showImpressumPage = () => {
+  setCurrentPage('impressum');
+  setMobileMenuOpen(false);
+};
+
+const showQuellenPage = () => {
+  setCurrentPage('quellen');
+  setMobileMenuOpen(false);
+};
+
+const showKontaktPage = () => {
+  setCurrentPage('kontakt');
+  setMobileMenuOpen(false);
+};
 
   const loadShelves = async () => {
     try {
@@ -142,6 +158,18 @@ export default function Home() {
       console.error('Fehler beim Laden der Filteroptionen:', error);
     }
   };
+
+  const loadLastUpdated = async () => {
+  try {
+    const response = await fetch('/api/last-updated');
+    if (response.ok) {
+      const data = await response.json();
+      setLastUpdated(data.last_updated);
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden des letzten Update-Datums:', error);
+  }
+};
 
   const openShowcaseDetails = async (id: number) => {
   try {
@@ -766,6 +794,240 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                 </div>
               </div>
             </div>
+
+            {/* Impressum Section */}
+            <div className="impressum-section">
+              <div className="container">
+                <div className="impressum-content">
+                  <div className="impressum-main">
+                    <h2 className="impressum-title">Impressum</h2>
+                    
+                    <div className="impressum-grid">
+                      <div className="impressum-card">
+                        <h3>🏫 Bildungseinrichtung</h3>
+                        <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
+                        <p>Lessingstraße 1</p>
+                        <p>09557 Flöha, Deutschland</p>
+                      </div>
+                      
+                      <div className="impressum-card">
+                        <h3>👤 Kontaktperson</h3>
+                        <p><strong>Dr. Schmidt</strong></p>
+                        <p>Fachbereich Geologie</p>
+                        <p>📞 03726 123456</p>
+                        <p>🌐 <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
+                            gymnasium-floeha.de
+                          </a>
+                        </p>
+                      </div>
+                      
+                      <div className="impressum-card">
+                        <h3>👥 Mitwirkende</h3>
+                        <p>• Dr. Schmidt (Projektleitung)</p>
+                        <p>• Sarah Müller (Digitalisierung)</p>
+                        <p>• Tom Weber (Programmierung)</p>
+                        <p>• Klasse 10a (Katalogisierung)</p>
+                      </div>
+                      
+                      <div className="impressum-card">
+                        <h3>📅 Letzte Aktualisierung</h3>
+                        <p className="last-update-date">
+                          {lastUpdated ? new Date(lastUpdated).toLocaleDateString('de-DE', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : 'Wird geladen...'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="impressum-links">
+                      <button className="impressum-link" onClick={showImpressumPage}>
+                        📋 Vollständiges Impressum
+                      </button>
+                      <button className="impressum-link" onClick={showQuellenPage}>
+                        📚 Quellen & Literatur
+                      </button>
+                      <button className="impressum-link" onClick={showKontaktPage}>
+                        ✉️ Kontakt & Support
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Impressum Page */}
+            {currentPage === 'impressum' && (
+              <section className="page active">
+                <div className="container">
+                  <div className="page-header">
+                    <h1 className="page-title">Impressum</h1>
+                    <p className="page-description">Rechtliche Informationen und Angaben zur Verantwortlichkeit</p>
+                  </div>
+                  
+                  <div className="legal-content">
+                    <div className="legal-section">
+                      <h2>Angaben gemäß § 5 TMG</h2>
+                      <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
+                      <p>Lessingstraße 1<br/>
+                        09557 Flöha<br/>
+                        Deutschland</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                      <h2>Vertreten durch</h2>
+                      <p>Schulleitung: Frau Direktor Weber<br/>
+                        Fachbereich Geologie: Dr. Schmidt</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                      <h2>Kontakt</h2>
+                      <p>Telefon: 03726 123456<br/>
+                        E-Mail: info@gymnasium-floeha.de<br/>
+                        Internet: www.gymnasium-floeha.de</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                      <h2>Haftung für Inhalte</h2>
+                      <p>Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.</p>
+                    </div>
+                    
+                    <div className="legal-section">
+                      <h2>Datenschutz</h2>
+                      <p>Diese Website verwendet keine Cookies und sammelt keine personenbezogenen Daten. Die Mineraliensammlung dient ausschließlich wissenschaftlichen und pädagogischen Zwecken.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Quellen Page */}
+            {currentPage === 'quellen' && (
+              <section className="page active">
+                <div className="container">
+                  <div className="page-header">
+                    <h1 className="page-title">Quellen & Literatur</h1>
+                    <p className="page-description">Wissenschaftliche Grundlagen und Referenzen</p>
+                  </div>
+                  
+                  <div className="sources-content">
+                    <div className="sources-section">
+                      <h2>📚 Hauptliteratur</h2>
+                      <ul className="sources-list">
+                        <li>Klein, C. & Dutrow, B. (2007). Manual of Mineral Science. 23rd Edition. John Wiley & Sons.</li>
+                        <li>Deer, W.A., Howie, R.A. & Zussman, J. (2013). An Introduction to the Rock-Forming Minerals. 3rd Edition. Mineralogical Society.</li>
+                        <li>Strunz, H. & Nickel, E.H. (2001). Strunz Mineralogical Tables. 9th Edition. E. Schweizerbart'sche Verlagsbuchhandlung.</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="sources-section">
+                      <h2>🌐 Online-Ressourcen</h2>
+                      <ul className="sources-list">
+                        <li><a href="https://www.mindat.org" target="_blank" rel="noopener noreferrer">Mindat.org - Mineraldatenbank</a></li>
+                        <li><a href="https://rruff.info" target="_blank" rel="noopener noreferrer">RRUFF Project - Mineraldatenbank</a></li>
+                        <li><a href="https://webmineral.com" target="_blank" rel="noopener noreferrer">Webmineral - Mineralogische Datenbank</a></li>
+                      </ul>
+                    </div>
+                    
+                    <div className="sources-section">
+                      <h2>🔬 Technische Ausstattung</h2>
+                      <ul className="sources-list">
+                        <li>Stereo-Mikroskop Leica EZ4 HD für Detailaufnahmen</li>
+                        <li>Digitalkamera Nikon D7500 für Übersichtsbilder</li>
+                        <li>Mineralbestimmung mit Mohshärte-Skala und Strichtafel</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="sources-section">
+                      <h2>🎓 Mitwirkende Personen</h2>
+                      <ul className="sources-list">
+                        <li><strong>Dr. Schmidt</strong> - Projektleitung, geologische Expertise</li>
+                        <li><strong>Sarah Müller</strong> - Digitalisierung und Fotografie</li>
+                        <li><strong>Tom Weber</strong> - Webentwicklung und Datenbank</li>
+                        <li><strong>Schüler der Klassen 9-12</strong> - Katalogisierung und Beschreibung</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Kontakt Page */}
+            {currentPage === 'kontakt' && (
+              <section className="page active">
+                <div className="container">
+                  <div className="page-header">
+                    <h1 className="page-title">Kontakt & Support</h1>
+                    <p className="page-description">Haben Sie Fragen zur Sammlung oder benötigen Sie Unterstützung?</p>
+                  </div>
+                  
+                  <div className="contact-content">
+                    <div className="contact-grid">
+                      <div className="contact-card">
+                        <h3>🏫 Schuladresse</h3>
+                        <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
+                        <p>Lessingstraße 1<br/>
+                          09557 Flöha<br/>
+                          Deutschland</p>
+                        <p>📞 <strong>03726 123456</strong></p>
+                        <p>📠 03726 123457</p>
+                      </div>
+                      
+                      <div className="contact-card">
+                        <h3>👤 Ansprechpartner</h3>
+                        <p><strong>Dr. Schmidt</strong><br/>
+                          Fachbereich Geologie</p>
+                        <p>📧 schmidt@gymnasium-floeha.de</p>
+                        <p>🕒 Sprechzeiten: Mo-Fr 8:00-15:00</p>
+                      </div>
+                      
+                      <div className="contact-card">
+                        <h3>💻 Technischer Support</h3>
+                        <p><strong>Tom Weber</strong><br/>
+                          IT-Administration</p>
+                        <p>📧 it-support@gymnasium-floeha.de</p>
+                        <p>🔧 Bei technischen Problemen mit der Website</p>
+                      </div>
+                      
+                      <div className="contact-card">
+                        <h3>🌐 Online</h3>
+                        <p><strong>Website:</strong><br/>
+                          <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
+                            gymnasium-floeha.de
+                          </a></p>
+                        <p><strong>Sammlung:</strong><br/>
+                          Diese Webanwendung</p>
+                      </div>
+                    </div>
+                    
+                    <div className="contact-info">
+                      <h2>ℹ️ Wichtige Informationen</h2>
+                      <div className="info-grid">
+                        <div className="info-item">
+                          <h4>🔍 Besichtigungen</h4>
+                          <p>Besichtigungen der physischen Sammlung sind nach Voranmeldung möglich. Bitte kontaktieren Sie Dr. Schmidt mindestens eine Woche im Voraus.</p>
+                        </div>
+                        <div className="info-item">
+                          <h4>📖 Bildungsnutzung</h4>
+                          <p>Diese Sammlung steht für Bildungszwecke zur Verfügung. Schulklassen und Interessierte sind herzlich willkommen.</p>
+                        </div>
+                        <div className="info-item">
+                          <h4>🤝 Kooperationen</h4>
+                          <p>Wir freuen uns über Kooperationen mit anderen Schulen, Universitäten und geologischen Vereinen.</p>
+                        </div>
+                        <div className="info-item">
+                          <h4>💝 Spenden</h4>
+                          <p>Mineralspenden zur Erweiterung der Sammlung werden gerne entgegengenommen. Bitte vorher Kontakt aufnehmen.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
           </section>
         )}
 
@@ -2243,6 +2505,368 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
         .about-card p {
           color: var(--gray-600);
           font-size: var(--font-size-sm);
+        }
+
+        /* Impressums-Bereich auf der Startseite */
+        .impressum-section {
+          padding: var(--space-20) 0;
+          background: var(--gray-100);
+          border-top: 1px solid var(--gray-200);
+        }
+
+        .impressum-content {
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        .impressum-title {
+          font-size: var(--font-size-3xl);
+          font-weight: 700;
+          color: var(--gray-900);
+          text-align: center;
+          margin-bottom: var(--space-12);
+        }
+
+        .impressum-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: var(--space-6);
+          margin-bottom: var(--space-10);
+        }
+
+        .impressum-card {
+          background: var(--white);
+          padding: var(--space-6);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--gray-200);
+          transition: all var(--transition-normal);
+        }
+
+        .impressum-card:hover {
+          box-shadow: var(--shadow-md);
+          transform: translateY(-2px);
+        }
+
+        .impressum-card h3 {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--primary-color);
+          margin-bottom: var(--space-4);
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+
+        .impressum-card p {
+          color: var(--gray-700);
+          margin-bottom: var(--space-2);
+          line-height: 1.5;
+        }
+
+        .impressum-card p:last-child {
+          margin-bottom: 0;
+        }
+
+        .impressum-card strong {
+          color: var(--gray-900);
+          font-weight: 600;
+        }
+
+        .impressum-card a {
+          color: var(--primary-color);
+          text-decoration: none;
+          transition: color var(--transition-fast);
+        }
+
+        .impressum-card a:hover {
+          color: var(--primary-dark);
+          text-decoration: underline;
+        }
+
+        .last-update-date {
+          font-weight: 600;
+          color: var(--primary-color);
+          background: rgba(30, 64, 175, 0.1);
+          padding: var(--space-3);
+          border-radius: var(--radius-md);
+          text-align: center;
+        }
+
+        .impressum-links {
+          display: flex;
+          justify-content: center;
+          gap: var(--space-4);
+          flex-wrap: wrap;
+          margin-top: var(--space-8);
+        }
+
+        .impressum-link {
+          background: var(--primary-color);
+          color: var(--white);
+          border: none;
+          padding: var(--space-3) var(--space-6);
+          border-radius: var(--radius-lg);
+          font-size: var(--font-size-sm);
+          font-weight: 500;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+
+        .impressum-link:hover {
+          background: var(--primary-dark);
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-md);
+        }
+
+        /* Rechtliche Seiten */
+        .legal-content,
+        .sources-content,
+        .contact-content {
+          max-width: 800px;
+          margin: 0 auto;
+          background: var(--white);
+          border-radius: var(--radius-xl);
+          padding: var(--space-8);
+          box-shadow: var(--shadow-lg);
+          border: 1px solid var(--gray-200);
+        }
+
+        .legal-section,
+        .sources-section {
+          margin-bottom: var(--space-8);
+          padding-bottom: var(--space-6);
+          border-bottom: 1px solid var(--gray-200);
+        }
+
+        .legal-section:last-child,
+        .sources-section:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+          padding-bottom: 0;
+        }
+
+        .legal-section h2,
+        .sources-section h2 {
+          font-size: var(--font-size-xl);
+          font-weight: 600;
+          color: var(--primary-color);
+          margin-bottom: var(--space-4);
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+
+        .legal-section p,
+        .sources-section p {
+          color: var(--gray-700);
+          line-height: 1.7;
+          margin-bottom: var(--space-3);
+        }
+
+        .legal-section p:last-child,
+        .sources-section p:last-child {
+          margin-bottom: 0;
+        }
+
+        /* Quellen-Listen */
+        .sources-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .sources-list li {
+          padding: var(--space-3) 0;
+          border-bottom: 1px solid var(--gray-200);
+          color: var(--gray-700);
+          line-height: 1.6;
+        }
+
+        .sources-list li:last-child {
+          border-bottom: none;
+        }
+
+        .sources-list li::before {
+          content: "📎";
+          margin-right: var(--space-3);
+        }
+
+        .sources-list a {
+          color: var(--primary-color);
+          text-decoration: none;
+          font-weight: 500;
+          transition: color var(--transition-fast);
+        }
+
+        .sources-list a:hover {
+          color: var(--primary-dark);
+          text-decoration: underline;
+        }
+
+        /* Kontakt-Seite */
+        .contact-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: var(--space-6);
+          margin-bottom: var(--space-10);
+        }
+
+        .contact-card {
+          background: var(--gray-50);
+          padding: var(--space-6);
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--gray-200);
+          transition: all var(--transition-normal);
+        }
+
+        .contact-card:hover {
+          background: var(--white);
+          box-shadow: var(--shadow-md);
+          transform: translateY(-2px);
+        }
+
+        .contact-card h3 {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--primary-color);
+          margin-bottom: var(--space-4);
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+
+        .contact-card p {
+          color: var(--gray-700);
+          margin-bottom: var(--space-2);
+          line-height: 1.5;
+        }
+
+        .contact-card p:last-child {
+          margin-bottom: 0;
+        }
+
+        .contact-card strong {
+          color: var(--gray-900);
+          font-weight: 600;
+        }
+
+        .contact-card a {
+          color: var(--primary-color);
+          text-decoration: none;
+          transition: color var(--transition-fast);
+        }
+
+        .contact-card a:hover {
+          color: var(--primary-dark);
+          text-decoration: underline;
+        }
+
+        .contact-info {
+          margin-top: var(--space-10);
+          padding-top: var(--space-8);
+          border-top: 2px solid var(--gray-200);
+        }
+
+        .contact-info h2 {
+          font-size: var(--font-size-2xl);
+          font-weight: 700;
+          color: var(--gray-900);
+          margin-bottom: var(--space-6);
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-3);
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: var(--space-6);
+        }
+
+        .info-item {
+          background: var(--gray-50);
+          padding: var(--space-5);
+          border-radius: var(--radius-lg);
+          border-left: 4px solid var(--primary-color);
+        }
+
+        .info-item h4 {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--primary-color);
+          margin-bottom: var(--space-3);
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+
+        .info-item p {
+          color: var(--gray-700);
+          line-height: 1.6;
+          margin: 0;
+        }
+
+        /* Mobile Anpassungen */
+        @media (max-width: 768px) {
+          .impressum-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+          }
+          
+          .impressum-links {
+            flex-direction: column;
+            align-items: center;
+          }
+          
+          .impressum-link {
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+          }
+          
+          .contact-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .info-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .legal-content,
+          .sources-content,
+          .contact-content {
+            padding: var(--space-6);
+            margin: var(--space-4);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .impressum-section {
+            padding: var(--space-16) 0;
+          }
+          
+          .impressum-title {
+            font-size: var(--font-size-2xl);
+          }
+          
+          .impressum-card,
+          .contact-card {
+            padding: var(--space-4);
+          }
+          
+          .legal-content,
+          .sources-content,
+          .contact-content {
+            padding: var(--space-4);
+            margin: var(--space-2);
+          }
         }
 
         /* Search and Filter */
