@@ -3895,51 +3895,6 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const form = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        form.append(key, value);
-      });
-      if (image) {
-        form.append('image', image);
-      }
-
-      const response = await fetch('/api/minerals', {
-        method: 'POST',
-        body: form
-      });
-
-      if (response.ok) {
-        setFormData({
-          name: '',
-          number: '',
-          color: '',
-          description: '',
-          location: '',
-          purchase_location: '',
-          rock_type: '',
-          shelf_id: ''
-        });
-        setImage(null);
-        onSuccess();
-        alert('Mineral erfolgreich hinzugefügt!');
-      } else {
-        const error = await response.text();
-        alert('Fehler: ' + error);
-      }
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen des Minerals:', error);
-      alert('Fehler beim Hinzufügen des Minerals');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-
   return (
     <form onSubmit={handleSubmit}>
       <div className="form-group">
