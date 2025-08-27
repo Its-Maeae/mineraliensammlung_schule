@@ -3930,12 +3930,12 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
             )}
             {!checkingNumber && formData.number.trim() && numberExists && (
               <span className="error-indicator">
-                ❌ Diese Nummer existiert bereits
+                Diese Nummer existiert bereits
               </span>
             )}
             {!checkingNumber && formData.number.trim() && !numberExists && (
               <span className="success-indicator">
-                ✅ Nummer verfügbar
+                Nummer verfügbar
               </span>
             )}
           </div>
