@@ -1,4 +1,3 @@
-// pages/api/last-updated.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import database from '../../lib/database.ts';
 

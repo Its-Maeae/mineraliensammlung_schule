@@ -71,19 +71,19 @@ export default function Home() {
   }, []);
 
   const showImpressumPage = () => {
-  setCurrentPage('impressum');
-  setMobileMenuOpen(false);
-};
+    setCurrentPage('impressum');
+    setMobileMenuOpen(false);
+  };
 
-const showQuellenPage = () => {
-  setCurrentPage('quellen');
-  setMobileMenuOpen(false);
-};
+  const showQuellenPage = () => {
+    setCurrentPage('quellen');
+    setMobileMenuOpen(false);
+  };
 
-const showKontaktPage = () => {
-  setCurrentPage('kontakt');
-  setMobileMenuOpen(false);
-};
+  const showKontaktPage = () => {
+    setCurrentPage('kontakt');
+    setMobileMenuOpen(false);
+  };
 
   const loadShelves = async () => {
     try {
@@ -834,7 +834,7 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                       </div>
 
                       <div className="impressum-card">
-                        <h3>🏫 Bildungseinrichtung</h3>
+                        <h3>Bildungseinrichtung</h3>
                         <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
                         <p>Turnerstraße 16</p>
                         <p>09557 Flöha, Deutschland</p>
@@ -852,7 +852,7 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                       </div>
                       
                       <div className="impressum-card">
-                        <h3>📅 Letzte Aktualisierung</h3>
+                        <h3>Letzte Aktualisierung</h3>
                         <p className="last-update-date">
                           {lastUpdated ? new Date(lastUpdated).toLocaleDateString('de-DE', {
                             year: 'numeric',
@@ -867,13 +867,13 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
                     
                     <div className="impressum-links">
                       <button className="impressum-link" onClick={showImpressumPage}>
-                        📋 Vollständiges Impressum
+                        Vollständiges Impressum
                       </button>
                       <button className="impressum-link" onClick={showQuellenPage}>
-                        📚 Quellen & Literatur
+                        Quellen & Literatur
                       </button>
                       <button className="impressum-link" onClick={showKontaktPage}>
-                        ✉️ Kontakt & Support
+                        Kontakt & Support
                       </button>
                     </div>
                   </div>
@@ -3411,6 +3411,108 @@ const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) 
           overflow: hidden;
         }
 
+        .number-input-container {
+          position: relative;
+        }
+
+        .number-input {
+          width: 100%;
+          padding: var(--space-3) var(--space-4);
+          border: 2px solid var(--gray-200);
+          border-radius: var(--radius-lg);
+          font-size: var(--font-size-base);
+          transition: border-color var(--transition-fast);
+          background: var(--white);
+        }
+
+        .number-input:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .number-input.error {
+          border-color: var(--error-color);
+          background-color: rgba(239, 68, 68, 0.05);
+        }
+
+        .number-input.error:focus {
+          border-color: var(--error-color);
+          box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .number-input.success {
+          border-color: var(--success-color);
+          background-color: rgba(16, 185, 129, 0.05);
+        }
+
+        .number-input.success:focus {
+          border-color: var(--success-color);
+          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .number-validation-indicator {
+          margin-top: var(--space-2);
+          min-height: 24px;
+          display: flex;
+          align-items: center;
+        }
+
+        .checking-indicator {
+          color: var(--gray-600);
+          font-size: var(--font-size-sm);
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+
+        .error-indicator {
+          color: var(--error-color);
+          font-size: var(--font-size-sm);
+          font-weight: 500;
+        }
+
+        .success-indicator {
+          color: var(--success-color);
+          font-size: var(--font-size-sm);
+          font-weight: 500;
+        }
+
+        .spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid var(--gray-300);
+          border-top: 2px solid var(--gray-600);
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        /* Button Disabled State Styles */
+        .btn:disabled {
+          background: var(--gray-300);
+          color: var(--gray-500);
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .btn-primary:disabled {
+          background: var(--gray-300);
+          border-color: var(--gray-300);
+        }
+
+        .btn-primary:disabled:hover {
+          background: var(--gray-300);
+          border-color: var(--gray-300);
+          transform: none;
+          box-shadow: none;
+        }
+
         .mineral-image-small img {
           width: 100%;
           height: 100%;
@@ -3664,6 +3766,11 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [shelves, setShelves] = useState<any[]>([]);
+  
+  // Neue States für die Nummer-Validierung
+  const [numberExists, setNumberExists] = useState(false);
+  const [checkingNumber, setCheckingNumber] = useState(false);
+  const [numberCheckTimeout, setNumberCheckTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     loadShelves();
@@ -3678,6 +3785,113 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
       }
     } catch (error) {
       console.error('Fehler beim Laden der Regale:', error);
+    }
+  };
+
+    // Funktion zur Überprüfung der Steinnummer
+  const checkMineralNumber = async (number: string) => {
+    if (!number.trim()) {
+      setNumberExists(false);
+      return;
+    }
+
+    try {
+      setCheckingNumber(true);
+      const response = await fetch(`/api/minerals/check-number?number=${encodeURIComponent(number.trim())}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setNumberExists(data.exists);
+      } else {
+        console.error('Fehler beim Überprüfen der Nummer:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Fehler beim Überprüfen der Nummer:', error);
+    } finally {
+      setCheckingNumber(false);
+    }
+  };
+
+  // Debounced Nummer-Überprüfung
+  const handleNumberChange = (value: string) => {
+    setFormData({...formData, number: value});
+    
+    // Vorherigen Timeout löschen
+    if (numberCheckTimeout) {
+      clearTimeout(numberCheckTimeout);
+    }
+    
+    // Neuen Timeout setzen (500ms Verzögerung)
+    const timeout = setTimeout(() => {
+      checkMineralNumber(value);
+    }, 500);
+    
+    setNumberCheckTimeout(timeout);
+  };
+
+  // Cleanup beim Unmount
+  useEffect(() => {
+    return () => {
+      if (numberCheckTimeout) {
+        clearTimeout(numberCheckTimeout);
+      }
+    };
+  }, [numberCheckTimeout]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Überprüfung vor dem Absenden
+    if (numberExists) {
+      alert('Diese Steinnummer existiert bereits. Bitte wählen Sie eine andere Nummer.');
+      return;
+    }
+
+    if (!formData.number.trim()) {
+      alert('Bitte geben Sie eine Steinnummer ein.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const form = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        form.append(key, value);
+      });
+      if (image) {
+        form.append('image', image);
+      }
+
+      const response = await fetch('/api/minerals', {
+        method: 'POST',
+        body: form
+      });
+
+      if (response.ok) {
+        setFormData({
+          name: '',
+          number: '',
+          color: '',
+          description: '',
+          location: '',
+          purchase_location: '',
+          rock_type: '',
+          shelf_id: ''
+        });
+        setImage(null);
+        setNumberExists(false);
+        onSuccess();
+        alert('Mineral erfolgreich hinzugefügt!');
+      } else {
+        const error = await response.text();
+        alert('Fehler: ' + error);
+      }
+    } catch (error) {
+      console.error('Fehler beim Hinzufügen des Minerals:', error);
+      alert('Fehler beim Hinzufügen des Minerals');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -3742,14 +3956,35 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
 
       <div className="form-group">
         <label htmlFor="number">Steinnummer</label>
-        <input
-          type="text"
-          id="number"
-          value={formData.number}
-          onChange={(e) => setFormData({...formData, number: e.target.value})}
-          placeholder="Eindeutige Identifikationsnummer"
-          required
-        />
+        <div className="number-input-container">
+          <input
+            type="text"
+            id="number"
+            value={formData.number}
+            onChange={(e) => handleNumberChange(e.target.value)}
+            placeholder="Eindeutige Identifikationsnummer"
+            className={`number-input ${numberExists ? 'error' : formData.number.trim() && !checkingNumber && !numberExists ? 'success' : ''}`}
+            required
+          />
+          <div className="number-validation-indicator">
+            {checkingNumber && (
+              <span className="checking-indicator">
+                <span className="spinner"></span>
+                Überprüfe...
+              </span>
+            )}
+            {!checkingNumber && formData.number.trim() && numberExists && (
+              <span className="error-indicator">
+                ❌ Diese Nummer existiert bereits
+              </span>
+            )}
+            {!checkingNumber && formData.number.trim() && !numberExists && (
+              <span className="success-indicator">
+                ✅ Nummer verfügbar
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="form-group">
@@ -3837,7 +4072,11 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
 
-      <button type="submit" disabled={loading} className="btn btn-primary btn-large">
+      <button 
+        type="submit" 
+        disabled={loading || numberExists || checkingNumber || !formData.number.trim()} 
+        className="btn btn-primary btn-large"
+      >
         {loading ? 'Wird hinzugefügt...' : 'Mineral hinzufügen'}
       </button>
     </form>
