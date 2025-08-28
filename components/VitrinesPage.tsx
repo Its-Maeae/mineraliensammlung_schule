@@ -1,39 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Showcase } from '../types';
 
 interface VitrinesPageProps {
+  showcases: Showcase[];
+  loading: boolean;
   isAuthenticated: boolean;
   onOpenShowcaseDetails: (id: number) => void;
   setShowVitrineForm: (show: boolean) => void;
 }
 
 export default function VitrinesPage({ 
+  showcases,
+  loading,
   isAuthenticated, 
   onOpenShowcaseDetails, 
   setShowVitrineForm 
 }: VitrinesPageProps) {
-  const [showcases, setShowcases] = useState<Showcase[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    loadShowcases();
-  }, []);
-
-  const loadShowcases = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/showcases');
-      if (response.ok) {
-        const data = await response.json();
-        setShowcases(data);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Vitrinen:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <section className="page active">
       <div className="container">
@@ -58,7 +40,7 @@ export default function VitrinesPage({
             <div className="loading">Lade Vitrinen...</div>
           ) : showcases.length === 0 ? (
             <div className="no-showcases">
-              <h3>🛏️ Noch keine Vitrinen vorhanden</h3>
+              <h3>🛏 Noch keine Vitrinen vorhanden</h3>
               <p>Fügen Sie Ihre erste Vitrine hinzu, um Ihre Sammlung zu organisieren.</p>
             </div>
           ) : (
@@ -72,7 +54,7 @@ export default function VitrinesPage({
                   {showcase.image_path ? (
                     <img src={`/uploads/${showcase.image_path}`} alt={showcase.name} />
                   ) : (
-                    <div className="placeholder">🛏️</div>
+                    <div className="placeholder">🛏</div>
                   )}
                 </div>
                 <div className="vitrine-info">

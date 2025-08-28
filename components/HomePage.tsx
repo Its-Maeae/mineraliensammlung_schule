@@ -1,47 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Stats } from '../types';
 
 interface HomePageProps {
   showPage: (page: string) => void;
+  stats: Stats;
+  lastUpdated: string;
+  loadLastUpdated: () => void;
 }
 
-export default function HomePage({ showPage }: HomePageProps) {
-  const [stats, setStats] = useState<Stats>({
-    total_minerals: 0,
-    total_locations: 0,
-    total_colors: 0,
-    total_shelves: 0
-  });
-  const [lastUpdated, setLastUpdated] = useState<string>('');
-
+export default function HomePage({ showPage, stats, lastUpdated, loadLastUpdated }: HomePageProps) {
   useEffect(() => {
-    loadStats();
     loadLastUpdated();
   }, []);
-
-  const loadStats = async () => {
-    try {
-      const response = await fetch('/api/stats');
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Statistiken:', error);
-    }
-  };
-
-  const loadLastUpdated = async () => {
-    try {
-      const response = await fetch('/api/last-updated');
-      if (response.ok) {
-        const data = await response.json();
-        setLastUpdated(data.last_updated);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden des letzten Update-Datums:', error);
-    }
-  };
 
   const showImpressumPage = () => {
     showPage('impressum');
@@ -229,7 +199,7 @@ export default function HomePage({ showPage }: HomePageProps) {
                 <div className="impressum-card">
                   <h3>Bildungseinrichtung</h3>
                   <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
-                  <p>Turnerstraße 16</p>
+                  <p>TurnerstraÃŸe 16</p>
                   <p>09557 Flöha, Deutschland</p>
                   <p>🌐 <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
                       gymnasium-floeha.de

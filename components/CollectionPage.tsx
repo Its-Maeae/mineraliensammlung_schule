@@ -1,12 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Mineral } from '../types';
-
-interface CollectionPageProps {
-  isAuthenticated: boolean;
-  onOpenMineralDetails: (id: number) => void;
-  onEditMineral: (mineral: Mineral) => void;
-  onDeleteMineral: (id: number) => void;
-}
 
 interface FilterOptions {
   colors: string[];
@@ -14,78 +7,43 @@ interface FilterOptions {
   rock_types: string[];
 }
 
+interface CollectionPageProps {
+  minerals: Mineral[];
+  loading: boolean;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  colorFilter: string;
+  setColorFilter: (color: string) => void;
+  locationFilter: string;
+  setLocationFilter: (location: string) => void;
+  rockTypeFilter: string;
+  setRockTypeFilter: (type: string) => void;
+  sortBy: string;
+  setSortBy: (sort: string) => void;
+  filterOptions: FilterOptions;
+  hasActiveFilters: boolean;
+  clearFilters: () => void;
+  onOpenMineralDetails: (id: number) => void;
+}
+
 export default function CollectionPage({ 
-  isAuthenticated, 
-  onOpenMineralDetails, 
-  onEditMineral, 
-  onDeleteMineral 
+  minerals,
+  loading,
+  searchTerm,
+  setSearchTerm,
+  colorFilter,
+  setColorFilter,
+  locationFilter,
+  setLocationFilter,
+  rockTypeFilter,
+  setRockTypeFilter,
+  sortBy,
+  setSortBy,
+  filterOptions,
+  hasActiveFilters,
+  clearFilters,
+  onOpenMineralDetails
 }: CollectionPageProps) {
-  const [minerals, setMinerals] = useState<Mineral[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [colorFilter, setColorFilter] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [rockTypeFilter, setRockTypeFilter] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    colors: [],
-    locations: [],
-    rock_types: []
-  });
-
-  useEffect(() => {
-    loadMinerals();
-    loadFilterOptions();
-  }, []);
-
-  useEffect(() => {
-    loadMinerals();
-  }, [searchTerm, colorFilter, locationFilter, rockTypeFilter, sortBy]);
-
-  const loadMinerals = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        search: searchTerm,
-        color: colorFilter,
-        location: locationFilter,
-        rock_type: rockTypeFilter,
-        sort: sortBy
-      });
-      
-      const response = await fetch(`/api/minerals?${params}`);
-      if (response.ok) {
-        const data = await response.json();
-        setMinerals(data);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Mineralien:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadFilterOptions = async () => {
-    try {
-      const response = await fetch('/api/filter-options');
-      if (response.ok) {
-        const data = await response.json();
-        setFilterOptions(data);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Filteroptionen:', error);
-    }
-  };
-
-  const clearFilters = () => {
-    setSearchTerm('');
-    setColorFilter('');
-    setLocationFilter('');
-    setRockTypeFilter('');
-  };
-
-  const hasActiveFilters = searchTerm || colorFilter || locationFilter || rockTypeFilter;
-
   return (
     <section className="page active">
       <div className="container">

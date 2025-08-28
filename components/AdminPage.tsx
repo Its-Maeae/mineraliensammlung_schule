@@ -31,7 +31,7 @@ export default function AdminPage({ isAuthenticated, onSuccess }: AdminPageProps
         <div className="container">
           <div className="page-header">
             <h1 className="page-title">Zugriff verweigert</h1>
-            <p className="page-description">Sie müssen angemeldet sein, um diese Seite zu sehen.</p>
+            <p className="page-description">Sie mÃ¼ssen angemeldet sein, um diese Seite zu sehen.</p>
           </div>
         </div>
       </section>
@@ -43,7 +43,7 @@ export default function AdminPage({ isAuthenticated, onSuccess }: AdminPageProps
       <div className="container">
         <div className="page-header">
           <h1 className="page-title">Verwaltung</h1>
-          <p className="page-description">Neue Mineralien zur Sammlung hinzufügen</p>
+          <p className="page-description">Neue Mineralien zur Sammlung hinzufÃ¼gen</p>
         </div>
         
         <div className="admin-form-container">
@@ -70,7 +70,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
   const [loading, setLoading] = useState(false);
   const [shelves, setShelves] = useState<ShelfOption[]>([]);
   
-  // States für die Nummer-Validierung
+  // States fÃ¼r die Nummer-Validierung
   const [numberExists, setNumberExists] = useState(false);
   const [checkingNumber, setCheckingNumber] = useState(false);
   const [numberCheckTimeout, setNumberCheckTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -91,7 +91,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
     }
   };
 
-  // Funktion zur Überprüfung der Steinnummer
+  // Funktion zur ÃœberprÃ¼fung der Steinnummer
   const checkMineralNumber = async (number: string) => {
     if (!number.trim()) {
       setNumberExists(false);
@@ -106,25 +106,25 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
         const data = await response.json();
         setNumberExists(data.exists);
       } else {
-        console.error('Fehler beim Überprüfen der Nummer:', response.statusText);
+        console.error('Fehler beim ÃœberprÃ¼fen der Nummer:', response.statusText);
       }
     } catch (error) {
-      console.error('Fehler beim Überprüfen der Nummer:', error);
+      console.error('Fehler beim ÃœberprÃ¼fen der Nummer:', error);
     } finally {
       setCheckingNumber(false);
     }
   };
 
-  // Debounced Nummer-Überprüfung
+  // Debounced Nummer-ÃœberprÃ¼fung
   const handleNumberChange = (value: string) => {
     setFormData({...formData, number: value});
     
-    // Vorherigen Timeout löschen
+    // Vorherigen Timeout lÃ¶schen
     if (numberCheckTimeout) {
       clearTimeout(numberCheckTimeout);
     }
     
-    // Neuen Timeout setzen (500ms Verzögerung)
+    // Neuen Timeout setzen (500ms VerzÃ¶gerung)
     const timeout = setTimeout(() => {
       checkMineralNumber(value);
     }, 500);
@@ -144,9 +144,9 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Überprüfung vor dem Absenden
+    // ÃœberprÃ¼fung vor dem Absenden
     if (numberExists) {
-      alert('Diese Steinnummer existiert bereits. Bitte wählen Sie eine andere Nummer.');
+      alert('Diese Steinnummer existiert bereits. Bitte wÃ¤hlen Sie eine andere Nummer.');
       return;
     }
 
@@ -185,14 +185,14 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
         setImage(null);
         setNumberExists(false);
         onSuccess();
-        alert('Mineral erfolgreich hinzugefügt!');
+        alert('Mineral erfolgreich hinzugefÃ¼gt!');
       } else {
         const error = await response.text();
         alert('Fehler: ' + error);
       }
     } catch (error) {
-      console.error('Fehler beim Hinzufügen des Minerals:', error);
-      alert('Fehler beim Hinzufügen des Minerals');
+      console.error('Fehler beim HinzufÃ¼gen des Minerals:', error);
+      alert('Fehler beim HinzufÃ¼gen des Minerals');
     } finally {
       setLoading(false);
     }
@@ -228,7 +228,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
             {checkingNumber && (
               <span className="checking-indicator">
                 <span className="spinner"></span>
-                Überprüfe...
+                ÃœberprÃ¼fe...
               </span>
             )}
             {!checkingNumber && formData.number.trim() && numberExists && (
@@ -238,7 +238,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
             )}
             {!checkingNumber && formData.number.trim() && !numberExists && (
               <span className="success-indicator">
-                Nummer verfügbar
+                Nummer verfÃ¼gbar
               </span>
             )}
           </div>
@@ -299,7 +299,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
           id="rock_type"
           value={formData.rock_type}
           onChange={(e) => setFormData({...formData, rock_type: e.target.value})}
-          placeholder="z.B. magmatisch, sedimentär, metamorph"
+          placeholder="z.B. magmatisch, sedimentÃ¤r, metamorph"
           required
         />
       </div>
@@ -335,7 +335,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
         disabled={loading || numberExists || checkingNumber || !formData.number.trim()} 
         className="btn btn-primary btn-large"
       >
-        {loading ? 'Wird hinzugefügt...' : 'Mineral hinzufügen'}
+        {loading ? 'Wird hinzugefÃ¼gt...' : 'Mineral hinzufÃ¼gen'}
       </button>
     </form>
   );

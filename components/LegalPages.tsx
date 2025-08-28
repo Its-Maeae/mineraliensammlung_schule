@@ -16,10 +16,10 @@ export default function LegalPages({ currentPage }: LegalPagesProps) {
           
           <div className="legal-content">
             <div className="legal-section">
-              <h2>Angaben gemäß § 5 TMG</h2>
-              <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
-              <p>Turnerstraße 16<br/>
-                09557 Flöha<br/>
+              <h2>Angaben gemÃ¤ÃŸ Â§ 5 TMG</h2>
+              <p><strong>Samuel von Pufendorf Gymnasium FlÃ¶ha</strong></p>
+              <p>TurnerstraÃŸe 16<br/>
+                09557 FlÃ¶ha<br/>
                 Deutschland</p>
             </div>
             
@@ -37,13 +37,13 @@ export default function LegalPages({ currentPage }: LegalPagesProps) {
             </div>
             
             <div className="legal-section">
-              <h2>Haftung für Inhalte</h2>
-              <p>Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.</p>
+              <h2>Haftung fÃ¼r Inhalte</h2>
+              <p>Als Diensteanbieter sind wir gemÃ¤ÃŸ Â§ 7 Abs.1 TMG fÃ¼r eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Die Inhalte unserer Seiten wurden mit grÃ¶ÃŸter Sorgfalt erstellt. FÃ¼r die Richtigkeit, VollstÃ¤ndigkeit und AktualitÃ¤t der Inhalte kÃ¶nnen wir jedoch keine GewÃ¤hr Ã¼bernehmen.</p>
             </div>
             
             <div className="legal-section">
               <h2>Datenschutz</h2>
-              <p>Diese Website verwendet keine Cookies und sammelt keine personenbezogenen Daten. Die Mineraliensammlung dient ausschließlich wissenschaftlichen und pädagogischen Zwecken.</p>
+              <p>Diese Website verwendet keine Cookies und sammelt keine personenbezogenen Daten. Die Mineraliensammlung dient ausschlieÃŸlich wissenschaftlichen und pÃ¤dagogischen Zwecken.</p>
             </div>
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function LegalPages({ currentPage }: LegalPagesProps) {
           
           <div className="sources-content">
             <div className="sources-section">
-              <h2>📚 Hauptliteratur</h2>
+              <h2>ðŸ“š Hauptliteratur</h2>
               <ul className="sources-list">
                 <li>Klein, C. & Dutrow, B. (2007). Manual of Mineral Science. 23rd Edition. John Wiley & Sons.</li>
                 <li>Deer, W.A., Howie, R.A. & Zussman, J. (2013). An Introduction to the Rock-Forming Minerals. 3rd Edition. Mineralogical Society.</li>
@@ -71,7 +71,7 @@ export default function LegalPages({ currentPage }: LegalPagesProps) {
             </div>
             
             <div className="sources-section">
-              <h2>🌐 Online-Ressourcen</h2>
+              <h2>ðŸŒ Online-Ressourcen</h2>
               <ul className="sources-list">
                 <li><a href="https://www.mindat.org" target="_blank" rel="noopener noreferrer">Mindat.org - Mineraldatenbank</a></li>
                 <li><a href="https://rruff.info" target="_blank" rel="noopener noreferrer">RRUFF Project - Mineraldatenbank</a></li>
@@ -80,21 +80,21 @@ export default function LegalPages({ currentPage }: LegalPagesProps) {
             </div>
             
             <div className="sources-section">
-              <h2>🔬 Technische Ausstattung</h2>
+              <h2>ðŸ”¬ Technische Ausstattung</h2>
               <ul className="sources-list">
-                <li>Stereo-Mikroskop Leica EZ4 HD für Detailaufnahmen</li>
-                <li>Digitalkamera Nikon D7500 für Übersichtsbilder</li>
-                <li>Mineralbestimmung mit Mohshärte-Skala und Strichtafel</li>
+                <li>Stereo-Mikroskop Leica EZ4 HD fÃ¼r Detailaufnahmen</li>
+                <li>Digitalkamera Nikon D7500 fÃ¼r Ãœbersichtsbilder</li>
+                <li>Mineralbestimmung mit MohshÃ¤rte-Skala und Strichtafel</li>
               </ul>
             </div>
             
             <div className="sources-section">
-              <h2>🎓 Mitwirkende Personen</h2>
+              <h2>ðŸŽ“ Mitwirkende Personen</h2>
               <ul className="sources-list">
                 <li><strong>Dr. Schmidt</strong> - Projektleitung, geologische Expertise</li>
-                <li><strong>Sarah Müller</strong> - Digitalisierung und Fotografie</li>
+                <li><strong>Sarah MÃ¼ller</strong> - Digitalisierung und Fotografie</li>
                 <li><strong>Tom Weber</strong> - Webentwicklung und Datenbank</li>
-                <li><strong>Schüler der Klassen 9-12</strong> - Katalogisierung und Beschreibung</li>
+                <li><strong>SchÃ¼ler der Klassen 9-12</strong> - Katalogisierung und Beschreibung</li>
               </ul>
             </div>
           </div>
@@ -109,38 +109,38 @@ export default function LegalPages({ currentPage }: LegalPagesProps) {
         <div className="container">
           <div className="page-header">
             <h1 className="page-title">Kontakt & Support</h1>
-            <p className="page-description">Haben Sie Fragen zur Sammlung oder benötigen Sie Unterstützung?</p>
+            <p className="page-description">Haben Sie Fragen zur Sammlung oder benÃ¶tigen Sie UnterstÃ¼tzung?</p>
           </div>
           
           <div className="contact-content">
             <div className="contact-grid">
               <div className="contact-card">
-                <h3>🏫 Schuladresse</h3>
-                <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
-                <p>Turnerstraße 16<br/>
-                  09557 Flöha<br/>
+                <h3>ðŸ« Schuladresse</h3>
+                <p><strong>Samuel von Pufendorf Gymnasium FlÃ¶ha</strong></p>
+                <p>TurnerstraÃŸe 16<br/>
+                  09557 FlÃ¶ha<br/>
                   Deutschland</p>
-                <p>📞 <strong>03726 58160</strong></p>
+                <p>ðŸ“ž <strong>03726 58160</strong></p>
               </div>
               
               <div className="contact-card">
-                <h3>👤 Ansprechpartner</h3>
+                <h3>ðŸ‘¤ Ansprechpartner</h3>
                 <p><strong>Frau Barthel</strong><br/>
                   Fachbereich Geologie</p>
-                <p>📧 manuela-barthel@gymnasium-floeha.lernsax.de</p>
-                <p>🕒 Sprechzeiten: Mo-Fr 8:00-15:00</p>
+                <p>ðŸ“§ manuela-barthel@gymnasium-floeha.lernsax.de</p>
+                <p>ðŸ•’ Sprechzeiten: Mo-Fr 8:00-15:00</p>
               </div>
               
               <div className="contact-card">
-                <h3>💻 Technischer Support</h3>
+                <h3>ðŸ’» Technischer Support</h3>
                 <p><strong>Marius Schmieder</strong><br/>
-                  Schüler Klasse 10c</p>
-                <p>📧 marius-schmieder@gymnasium-floeha.lernsax.de</p>
-                <p>📧 Bei technischen Problemen mit der Website</p>
+                  SchÃ¼ler Klasse 10c</p>
+                <p>ðŸ“§ marius-schmieder@gymnasium-floeha.lernsax.de</p>
+                <p>ðŸ“§ Bei technischen Problemen mit der Website</p>
               </div>
               
               <div className="contact-card">
-                <h3>🌐 Online</h3>
+                <h3>ðŸŒ Online</h3>
                 <p><strong>Website:</strong><br/>
                   <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
                     gymnasium-floeha.de
@@ -151,22 +151,22 @@ export default function LegalPages({ currentPage }: LegalPagesProps) {
             </div>
             
             <div className="contact-info">
-              <h2>ℹ️ Wichtige Informationen</h2>
+              <h2>â„¹ï¸ Wichtige Informationen</h2>
               <div className="info-grid">
                 <div className="info-item">
-                  <h4>🔍 Besichtigungen</h4>
-                  <p>Besichtigungen der physischen Sammlung sind nach Voranmeldung möglich. Bitte kontaktieren Sie Dr. Schmidt mindestens eine Woche im Voraus.</p>
+                  <h4>ðŸ” Besichtigungen</h4>
+                  <p>Besichtigungen der physischen Sammlung sind nach Voranmeldung mÃ¶glich. Bitte kontaktieren Sie Dr. Schmidt mindestens eine Woche im Voraus.</p>
                 </div>
                 <div className="info-item">
-                  <h4>📖 Bildungsnutzung</h4>
-                  <p>Diese Sammlung steht für Bildungszwecke zur Verfügung. Schulklassen und Interessierte sind herzlich willkommen.</p>
+                  <h4>ðŸ“– Bildungsnutzung</h4>
+                  <p>Diese Sammlung steht fÃ¼r Bildungszwecke zur VerfÃ¼gung. Schulklassen und Interessierte sind herzlich willkommen.</p>
                 </div>
                 <div className="info-item">
-                  <h4>🤝 Kooperationen</h4>
-                  <p>Wir freuen uns über Kooperationen mit anderen Schulen, Universitäten und geologischen Vereinen.</p>
+                  <h4>ðŸ¤ Kooperationen</h4>
+                  <p>Wir freuen uns Ã¼ber Kooperationen mit anderen Schulen, UniversitÃ¤ten und geologischen Vereinen.</p>
                 </div>
                 <div className="info-item">
-                  <h4>🎁 Spenden</h4>
+                  <h4>ðŸŽ Spenden</h4>
                   <p>Mineralspenden zur Erweiterung der Sammlung werden gerne entgegengenommen. Bitte vorher Kontakt aufnehmen.</p>
                 </div>
               </div>
