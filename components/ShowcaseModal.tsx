@@ -77,13 +77,13 @@ export default function ShowcaseModal({
               className="btn btn-secondary"
               onClick={() => onEdit(showcase)}
             >
-              ✏️ Bearbeiten
+              Bearbeiten
             </button>
             <button 
               className="btn error-btn"
               onClick={() => onDelete('showcase', showcase.id)}
             >
-              🗑️ Löschen
+              Löschen
             </button>
           </div>
         )}
