@@ -39,13 +39,13 @@ export default function ShelfModal({
               className="btn btn-secondary"
               onClick={() => onEdit(shelf)}
             >
-              ✏️ Bearbeiten
+              Bearbeiten
             </button>
             <button 
               className="btn error-btn"
               onClick={() => onDelete('shelf', shelf.id)}
             >
-              🗑️ Löschen
+              Löschen
             </button>
           </div>
         )}
