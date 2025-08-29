@@ -8,8 +8,18 @@ interface EditModalProps {
   setImage: (image: File | null) => void;
   shelves: any[];
   loading: boolean;
-  onSubmit: (e: React.FormEvent) => void;
+  setLoading: (loading: boolean) => void;
   onClose: () => void;
+  setEditMode: (mode: 'mineral' | 'showcase' | 'shelf' | null) => void;
+  setSelectedMineral: (mineral: any) => void;
+  setShowMineralModal: (show: boolean) => void;
+  setSelectedShowcase: (showcase: any) => void;
+  setShowShelfMineralsModal: (show: boolean) => void;
+  setSelectedShelf: (shelf: any) => void;
+  currentPage: string;
+  setMinerals: (minerals: any[]) => void;
+  setShowcases: (showcases: any[]) => void;
+  loadStats: () => void;
 }
 
 export default function EditModal({ 
@@ -20,9 +30,141 @@ export default function EditModal({
   setImage, 
   shelves, 
   loading, 
-  onSubmit, 
-  onClose 
+  setLoading,
+  onClose,
+  setEditMode,
+  setSelectedMineral,
+  setShowMineralModal,
+  setSelectedShowcase,
+  setShowShelfMineralsModal,
+  setSelectedShelf,
+  currentPage,
+  setMinerals,
+  setShowcases,
+  loadStats
 }: EditModalProps) {
+
+  const handleUpdateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const formDataToSend = new FormData();
+      
+      Object.keys(formData).forEach(key => {
+        if (key !== 'id' && formData[key] !== undefined && formData[key] !== null) {
+          formDataToSend.append(key, formData[key].toString());
+        }
+      });
+      
+      if (image) {
+        formDataToSend.append('image', image);
+      }
+
+      let url = '';
+      let entityName = '';
+      switch (editMode) {
+        case 'mineral':
+          url = `/api/minerals/${formData.id}`;
+          entityName = 'Mineral';
+          break;
+        case 'showcase':
+          url = `/api/showcases/${formData.id}`;
+          entityName = 'Vitrine';
+          break;
+        case 'shelf':
+          url = `/api/shelves/${formData.id}`;
+          entityName = 'Regal';
+          break;
+      }
+
+      const response = await fetch(url, {
+        method: 'PUT',
+        body: formDataToSend
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        setEditMode(null);
+        setImage(null);
+        setFormData({});
+        
+        if (editMode === 'mineral') {
+          if (currentPage === 'collection') {
+            // Reload minerals for collection page
+            const loadMinerals = async () => {
+              try {
+                const response = await fetch('/api/minerals');
+                if (response.ok) {
+                  const data = await response.json();
+                  setMinerals(data);
+                }
+              } catch (error) {
+                console.error('Fehler beim Laden der Mineralien:', error);
+              }
+            };
+            await loadMinerals();
+          }
+          setShowMineralModal(false);
+          setSelectedMineral(null);
+        } else if (editMode === 'showcase') {
+          // Reload showcases
+          const loadShowcases = async () => {
+            try {
+              const response = await fetch('/api/showcases');
+              if (response.ok) {
+                const data = await response.json();
+                setShowcases(data);
+              }
+            } catch (error) {
+              console.error('Fehler beim Laden der Vitrinen:', error);
+            }
+          };
+          await loadShowcases();
+          
+          // Reload current showcase details if it was open
+          if (formData.id) {
+            try {
+              const response = await fetch(`/api/showcases/${formData.id}`);
+              if (response.ok) {
+                const showcase = await response.json();
+                setSelectedShowcase(showcase);
+              }
+            } catch (error) {
+              console.error('Fehler beim Laden der Vitrine-Details:', error);
+            }
+          }
+        } else if (editMode === 'shelf') {
+          // Reload shelf's showcase if needed
+          if (formData.showcase_id) {
+            try {
+              const response = await fetch(`/api/showcases/${formData.showcase_id}`);
+              if (response.ok) {
+                const showcase = await response.json();
+                setSelectedShowcase(showcase);
+              }
+            } catch (error) {
+              console.error('Fehler beim Laden der Vitrine-Details:', error);
+            }
+          }
+          setShowShelfMineralsModal(false);
+          setSelectedShelf(null);
+        }
+        
+        loadStats();
+        alert(`${entityName} erfolgreich aktualisiert!`);
+      } else {
+        alert('Fehler: ' + (responseData.error || 'Unbekannter Fehler'));
+      }
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren:', error);
+      alert('Fehler beim Aktualisieren. Bitte versuchen Sie es erneut.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="modal" style={{ display: 'flex' }}>
       <div className="modal-content">
@@ -33,7 +175,7 @@ export default function EditModal({
           'Regal bearbeiten'}
         </h2>
         
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleUpdateSubmit}>
           {editMode === 'mineral' && (
             <>
               <div className="form-group">

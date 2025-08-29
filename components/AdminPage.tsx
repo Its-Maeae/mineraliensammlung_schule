@@ -31,7 +31,7 @@ export default function AdminPage({ isAuthenticated, onSuccess }: AdminPageProps
         <div className="container">
           <div className="page-header">
             <h1 className="page-title">Zugriff verweigert</h1>
-            <p className="page-description">Sie mÃ¼ssen angemeldet sein, um diese Seite zu sehen.</p>
+            <p className="page-description">Sie müssen angemeldet sein, um diese Seite zu sehen.</p>
           </div>
         </div>
       </section>
@@ -109,7 +109,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
         console.error('Fehler beim ÃœberprÃ¼fen der Nummer:', response.statusText);
       }
     } catch (error) {
-      console.error('Fehler beim ÃœberprÃ¼fen der Nummer:', error);
+      console.error('Fehler beim Überprüfen der Nummer:', error);
     } finally {
       setCheckingNumber(false);
     }

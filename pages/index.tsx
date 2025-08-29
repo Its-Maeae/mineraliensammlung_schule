@@ -43,24 +43,10 @@ export default function Home() {
   const [selectedMineral, setSelectedMineral] = useState<Mineral | null>(null);
   const [selectedShowcase, setSelectedShowcase] = useState<Showcase | null>(null);
   const [showVitrineForm, setShowVitrineForm] = useState(false);
-  const [vitrineFormData, setVitrineFormData] = useState({
-    name: '',
-    code: '',
-    location: '',
-    description: ''
-  });
-  const [vitrineImage, setVitrineImage] = useState<File | null>(null);
   const [showMineralModal, setShowMineralModal] = useState(false);
   const [showShowcaseModal, setShowShowcaseModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showShelfForm, setShowShelfForm] = useState(false);
-  const [shelfFormData, setShelfFormData] = useState({
-    name: '',
-    code: '',
-    description: '',
-    position_order: 0
-  });
-  const [shelfImage, setShelfImage] = useState<File | null>(null);
   const [showShelfMineralsModal, setShowShelfMineralsModal] = useState(false);
   const [selectedShelf, setSelectedShelf] = useState<any>(null);
   const [shelfMinerals, setShelfMinerals] = useState<Mineral[]>([]);
@@ -129,430 +115,12 @@ export default function Home() {
     }
   };
 
-  const loadMinerals = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        search: searchTerm,
-        color: colorFilter,
-        location: locationFilter,
-        rock_type: rockTypeFilter,
-        sort: sortBy
-      });
-      
-      const response = await fetch(`/api/minerals?${params}`);
-      if (response.ok) {
-        const data = await response.json();
-        setMinerals(data);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Mineralien:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadShowcases = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/showcases');
-      if (response.ok) {
-        const data = await response.json();
-        setShowcases(data);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Vitrinen:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadFilterOptions = async () => {
-    try {
-      const response = await fetch('/api/filter-options');
-      if (response.ok) {
-        const data = await response.json();
-        setFilterOptions(data);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Filteroptionen:', error);
-    }
-  };
-
-  const loadLastUpdated = async () => {
-    try {
-      const response = await fetch('/api/last-updated');
-      if (response.ok) {
-        const data = await response.json();
-        setLastUpdated(data.last_updated);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden des letzten Update-Datums:', error);
-    }
-  };
-
-  const openShowcaseDetails = async (id: number) => {
-    try {
-      const response = await fetch(`/api/showcases/${id}`);
-      if (response.ok) {
-        const showcase = await response.json();
-        setSelectedShowcase(showcase);
-        setShowShowcaseModal(true);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Vitrine-Details:', error);
-    }
-  };
-
-  const openShelfDetails = async (shelfId: number) => {
-    try {
-      setLoading(true);
-      console.log('Loading shelf details for ID:', shelfId);
-      
-      const response = await fetch(`/api/shelves/${shelfId}/minerals`);
-      const responseData = await response.json();
-      
-      console.log('Shelf details response:', responseData);
-      
-      if (response.ok) {
-        setSelectedShelf(responseData.shelfInfo);
-        setShelfMinerals(responseData.minerals);
-        setShowShelfMineralsModal(true);
-      } else {
-        console.error('Error loading shelf details:', responseData);
-        alert('Fehler beim Laden der Regal-Details: ' + (responseData.error || 'Unbekannter Fehler'));
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Regal-Details:', error);
-      alert('Fehler beim Laden der Regal-Details');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const checkAuthentication = async () => {
     try {
       const response = await fetch('/api/auth/check');
       setIsAuthenticated(response.ok);
     } catch (error) {
       setIsAuthenticated(false);
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-      });
-
-      if (response.ok) {
-        setIsAuthenticated(true);
-        setShowPasswordModal(false);
-        setPassword('');
-      } else {
-        alert('Falsches Passwort');
-      }
-    } catch (error) {
-      console.error('Login-Fehler:', error);
-    }
-  };
-
-  const openMineralDetails = async (id: number) => {
-    try {
-      const response = await fetch(`/api/minerals/${id}`);
-      if (response.ok) {
-        const mineral = await response.json();
-        setSelectedMineral(mineral);
-        setShowMineralModal(true);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Mineral-Details:', error);
-    }
-  };
-
-  const handleEditMineral = (mineral: Mineral) => {
-    setEditFormData({
-      id: mineral.id,
-      name: mineral.name,
-      number: mineral.number,
-      color: mineral.color || '',
-      description: mineral.description || '',
-      location: mineral.location || '',
-      purchase_location: mineral.purchase_location || '',
-      rock_type: mineral.rock_type || '',
-      shelf_id: mineral.shelf_id || ''
-    });
-    setEditMode('mineral');
-    setEditImage(null);
-  };
-
-  const handleEditShowcase = (showcase: Showcase) => {
-    setEditFormData({
-      id: showcase.id,
-      name: showcase.name,
-      code: showcase.code,
-      location: showcase.location || '',
-      description: showcase.description || ''
-    });
-    setEditMode('showcase');
-    setEditImage(null);
-  };
-
-  const handleEditShelf = (shelf: any) => {
-    console.log('Edit shelf:', shelf);
-    setEditFormData({
-      id: shelf.id,
-      name: shelf.name || shelf.shelf_name,
-      code: shelf.code,
-      description: shelf.description || '',
-      position_order: shelf.position_order || 0,
-      showcase_id: shelf.showcase_id || selectedShowcase?.id
-    });
-    setEditMode('shelf');
-    setEditImage(null);
-  };
-
-  const handleVitrineSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('name', vitrineFormData.name);
-      formData.append('code', vitrineFormData.code);
-      formData.append('location', vitrineFormData.location);
-      formData.append('description', vitrineFormData.description);
-      
-      if (vitrineImage) {
-        formData.append('image', vitrineImage);
-      }
-
-      const response = await fetch('/api/showcases', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        setVitrineFormData({
-          name: '',
-          code: '',
-          location: '',
-          description: ''
-        });
-        setVitrineImage(null);
-        setShowVitrineForm(false);
-        loadShowcases();
-        loadStats();
-        alert('Vitrine erfolgreich hinzugefügt!');
-      } else {
-        const error = await response.text();
-        alert('Fehler: ' + error);
-      }
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen der Vitrine:', error);
-      alert('Fehler beim Hinzufügen der Vitrine');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleShelfSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('name', shelfFormData.name);
-      formData.append('code', shelfFormData.code);
-      formData.append('description', shelfFormData.description);
-      formData.append('position_order', shelfFormData.position_order.toString());
-      formData.append('showcase_id', selectedShowcase!.id.toString());
-      
-      if (shelfImage) {
-        formData.append('image', shelfImage);
-      }
-
-      const response = await fetch('/api/shelves', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        setShelfFormData({
-          name: '',
-          code: '',
-          description: '',
-          position_order: 0
-        });
-        setShelfImage(null);
-        setShowShelfForm(false);
-        openShowcaseDetails(selectedShowcase!.id);
-        loadStats();
-        alert('Regal erfolgreich hinzugefügt!');
-      } else {
-        const error = await response.text();
-        alert('Fehler: ' + error);
-      }
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen des Regals:', error);
-      alert('Fehler beim Hinzufügen des Regals');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      
-      Object.keys(editFormData).forEach(key => {
-        if (key !== 'id' && editFormData[key] !== undefined && editFormData[key] !== null) {
-          formData.append(key, editFormData[key].toString());
-        }
-      });
-      
-      if (editImage) {
-        formData.append('image', editImage);
-      }
-
-      let url = '';
-      let entityName = '';
-      switch (editMode) {
-        case 'mineral':
-          url = `/api/minerals/${editFormData.id}`;
-          entityName = 'Mineral';
-          break;
-        case 'showcase':
-          url = `/api/showcases/${editFormData.id}`;
-          entityName = 'Vitrine';
-          break;
-        case 'shelf':
-          url = `/api/shelves/${editFormData.id}`;
-          entityName = 'Regal';
-          break;
-      }
-
-      const response = await fetch(url, {
-        method: 'PUT',
-        body: formData
-      });
-
-      const responseData = await response.json();
-
-      if (response.ok) {
-        setEditMode(null);
-        setEditImage(null);
-        setEditFormData({});
-        
-        if (editMode === 'mineral') {
-          if (currentPage === 'collection') loadMinerals();
-          setShowMineralModal(false);
-          setSelectedMineral(null);
-        } else if (editMode === 'showcase') {
-          loadShowcases();
-          if (selectedShowcase) {
-            await openShowcaseDetails(selectedShowcase.id);
-          }
-        } else if (editMode === 'shelf') {
-          if (selectedShowcase) {
-            await openShowcaseDetails(selectedShowcase.id);
-          }
-          setShowShelfMineralsModal(false);
-          setSelectedShelf(null);
-        }
-        
-        loadStats();
-        alert(`${entityName} erfolgreich aktualisiert!`);
-      } else {
-        alert('Fehler: ' + (responseData.error || 'Unbekannter Fehler'));
-      }
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren:', error);
-      alert('Fehler beim Aktualisieren. Bitte versuchen Sie es erneut.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (type: 'mineral' | 'showcase' | 'shelf', id: number) => {
-    const confirmMessage = {
-      mineral: 'Möchten Sie dieses Mineral wirklich löschen?',
-      showcase: 'Möchten Sie diese Vitrine wirklich löschen? Alle zugehörigen Regale werden ebenfalls gelöscht!',
-      shelf: 'Möchten Sie dieses Regal wirklich löschen? Alle zugeordneten Mineralien werden nicht gelöscht, aber ihre Regal-Zuordnung entfernt!'
-    };
-
-    if (!confirm(confirmMessage[type])) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      let url = '';
-      switch (type) {
-        case 'mineral':
-          url = `/api/minerals/${id}`;
-          break;
-        case 'showcase':
-          url = `/api/showcases/${id}`;
-          break;
-        case 'shelf':
-          url = `/api/shelves/${id}`;
-          break;
-      }
-
-      const response = await fetch(url, {
-        method: 'DELETE'
-      });
-
-      if (response.ok) {
-        if (type === 'mineral') {
-          setShowMineralModal(false);
-          setSelectedMineral(null);
-        } else if (type === 'showcase') {
-          setShowShowcaseModal(false);
-          setSelectedShowcase(null);
-        } else if (type === 'shelf') {
-          setShowShelfMineralsModal(false);
-          setSelectedShelf(null);
-        }
-
-        loadStats();
-        
-        if (currentPage === 'collection') {
-          loadMinerals();
-        }
-        
-        if (currentPage === 'vitrines') {
-          loadShowcases();
-        }
-        
-        if (type === 'shelf' && selectedShowcase) {
-          await openShowcaseDetails(selectedShowcase.id);
-        }
-
-        const entityNames = {
-          mineral: 'Mineral',
-          showcase: 'Vitrine',
-          shelf: 'Regal'
-        };
-
-        alert(`${entityNames[type]} erfolgreich gelöscht!`);
-      } else {
-        const responseData = await response.text();
-        alert('Fehler beim Löschen: ' + responseData);
-      }
-    } catch (error) {
-      console.error('Fehler beim Löschen:', error);
-      alert('Fehler beim Löschen. Bitte versuchen Sie es erneut.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -568,7 +136,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Mineraliensammlung - Samuel von Pufendorf Gymnasium Flöha</title>
+        <title>Mineraliensammlung - Samuel von Pufendorf Gymnasium FlÃ¶ha</title>
         <meta name="description" content="Entdecken Sie die Sammlung seltener Mineralien und Gesteine des Samuel von Pufendorf Gymnasium." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -592,14 +160,16 @@ export default function Home() {
             showPage={showPage}
             stats={stats}
             lastUpdated={lastUpdated}
-            loadLastUpdated={loadLastUpdated}
+            setLastUpdated={setLastUpdated}
           />
         )}
 
         {currentPage === 'collection' && (
           <CollectionPage 
             minerals={minerals}
+            setMinerals={setMinerals}
             loading={loading}
+            setLoading={setLoading}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             colorFilter={colorFilter}
@@ -611,19 +181,58 @@ export default function Home() {
             sortBy={sortBy}
             setSortBy={setSortBy}
             filterOptions={filterOptions}
+            setFilterOptions={setFilterOptions}
             hasActiveFilters={hasActiveFilters}
             clearFilters={clearFilters}
-            onOpenMineralDetails={openMineralDetails}
+            selectedMineral={selectedMineral}
+            setSelectedMineral={setSelectedMineral}
+            showMineralModal={showMineralModal}
+            setShowMineralModal={setShowMineralModal}
+            isAuthenticated={isAuthenticated}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            editFormData={editFormData}
+            setEditFormData={setEditFormData}
+            editImage={editImage}
+            setEditImage={setEditImage}
+            shelves={shelves}
+            loadStats={loadStats}
           />
         )}
 
         {currentPage === 'vitrines' && (
           <VitrinesPage 
             showcases={showcases}
+            setShowcases={setShowcases}
             loading={loading}
+            setLoading={setLoading}
             isAuthenticated={isAuthenticated}
-            onOpenShowcaseDetails={openShowcaseDetails}
+            selectedShowcase={selectedShowcase}
+            setSelectedShowcase={setSelectedShowcase}
+            showShowcaseModal={showShowcaseModal}
+            setShowShowcaseModal={setShowShowcaseModal}
+            showVitrineForm={showVitrineForm}
             setShowVitrineForm={setShowVitrineForm}
+            showShelfForm={showShelfForm}
+            setShowShelfForm={setShowShelfForm}
+            selectedShelf={selectedShelf}
+            setSelectedShelf={setSelectedShelf}
+            shelfMinerals={shelfMinerals}
+            setShelfMinerals={setShelfMinerals}
+            showShelfMineralsModal={showShelfMineralsModal}
+            setShowShelfMineralsModal={setShowShelfMineralsModal}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            editFormData={editFormData}
+            setEditFormData={setEditFormData}
+            editImage={editImage}
+            setEditImage={setEditImage}
+            selectedMineral={selectedMineral}
+            setSelectedMineral={setSelectedMineral}
+            showMineralModal={showMineralModal}
+            setShowMineralModal={setShowMineralModal}
+            shelves={shelves}
+            loadStats={loadStats}
           />
         )}
 
@@ -632,7 +241,6 @@ export default function Home() {
             isAuthenticated={isAuthenticated}
             onSuccess={() => {
               loadStats();
-              if (currentPage === 'collection') loadMinerals();
             }}
           />
         )}
@@ -646,75 +254,9 @@ export default function Home() {
         <PasswordModal 
           password={password}
           setPassword={setPassword}
-          onSubmit={handleLogin}
+          isAuthenticated={isAuthenticated}
+          setIsAuthenticated={setIsAuthenticated}
           onClose={() => setShowPasswordModal(false)}
-        />
-      )}
-
-      {showMineralModal && selectedMineral && (
-        <MineralModal 
-          mineral={selectedMineral}
-          isAuthenticated={isAuthenticated}
-          onClose={() => setShowMineralModal(false)}
-          onEdit={handleEditMineral}
-          onDelete={handleDelete}
-        />
-      )}
-
-      {showShowcaseModal && selectedShowcase && (
-        <ShowcaseModal 
-          showcase={selectedShowcase}
-          isAuthenticated={isAuthenticated}
-          onClose={() => setShowShowcaseModal(false)}
-          onEdit={handleEditShowcase}
-          onDelete={handleDelete}
-          setShowShelfForm={setShowShelfForm}
-          onOpenShelfDetails={openShelfDetails}
-        />
-      )}
-
-      {showShelfMineralsModal && selectedShelf && (
-        <ShelfModal 
-          shelf={selectedShelf}
-          minerals={shelfMinerals}
-          loading={loading}
-          isAuthenticated={isAuthenticated}
-          onClose={() => setShowShelfMineralsModal(false)}
-          onEdit={handleEditShelf}
-          onDelete={handleDelete}
-          onOpenMineralDetails={openMineralDetails}
-          setShowShelfMineralsModal={setShowShelfMineralsModal}
-        />
-      )}
-
-      {showVitrineForm && (
-        <VitrineFormModal 
-          formData={vitrineFormData}
-          setFormData={setVitrineFormData}
-          image={vitrineImage}
-          setImage={setVitrineImage}
-          loading={loading}
-          onSubmit={handleVitrineSubmit}
-          onClose={() => {
-            setShowVitrineForm(false);
-            setVitrineImage(null);
-          }}
-        />
-      )}
-
-      {showShelfForm && selectedShowcase && (
-        <ShelfFormModal 
-          showcase={selectedShowcase}
-          formData={shelfFormData}
-          setFormData={setShelfFormData}
-          image={shelfImage}
-          setImage={setShelfImage}
-          loading={loading}
-          onSubmit={handleShelfSubmit}
-          onClose={() => {
-            setShowShelfForm(false);
-            setShelfImage(null);
-          }}
         />
       )}
 
@@ -727,11 +269,21 @@ export default function Home() {
           setImage={setEditImage}
           shelves={shelves}
           loading={loading}
-          onSubmit={handleUpdateSubmit}
+          setLoading={setLoading}
           onClose={() => {
             setEditMode(null);
             setEditImage(null);
           }}
+          setEditMode={setEditMode}
+          setSelectedMineral={setSelectedMineral}
+          setShowMineralModal={setShowMineralModal}
+          setSelectedShowcase={setSelectedShowcase}
+          setShowShelfMineralsModal={setShowShelfMineralsModal}
+          setSelectedShelf={setSelectedShelf}
+          currentPage={currentPage}
+          setMinerals={setMinerals}
+          setShowcases={setShowcases}
+          loadStats={loadStats}
         />
       )}
     </>
