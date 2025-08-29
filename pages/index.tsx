@@ -1,20 +1,15 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { Mineral, Showcase, Stats } from '../types';
-import Header from '../components/Header.tsx';
-import MobileNav from '../components/MobileNav.tsx';
-import HomePage from '../components/HomePage.tsx';
-import CollectionPage from '../components/CollectionPage.tsx';
-import VitrinesPage from '../components/VitrinesPage.tsx';
-import AdminPage from '../components/AdminPage.tsx';
-import LegalPages from '../components/LegalPages.tsx';
-import PasswordModal from '../components/PasswordModal.tsx';
-import MineralModal from '../components/MineralModal.tsx';
-import ShowcaseModal from '../components/ShowcaseModal.tsx';
-import ShelfModal from '../components/ShelfModal.tsx';
-import VitrineFormModal from '../components/VitrineFormModal.tsx';
-import ShelfFormModal from '../components/ShelfFormModal.tsx';
-import EditModal from '../components/EditModal.tsx';
+import Header from '../components/Header';
+import MobileNav from '../components/MobileNav';
+import HomePage from '../components/HomePage';
+import CollectionPage from '../components/CollectionPage';
+import VitrinesPage from '../components/VitrinesPage';
+import AdminPage from '../components/AdminPage';
+import LegalPages from '../components/LegalPages';
+import PasswordModal from '../components/PasswordModal';
+import EditModal from '../components/EditModal';
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -56,39 +51,67 @@ export default function Home() {
   const [shelves, setShelves] = useState<any[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string>('');
 
-  useEffect(() => {
-    loadStats();
-    if (currentPage === 'collection') {
-      loadMinerals();
-      loadFilterOptions();
-    } else if (currentPage === 'vitrines') {
-      loadShowcases();
-    }
-  }, [currentPage]);
-
-  useEffect(() => {
-    loadShelves();
-  }, []);
-
-  useEffect(() => {
-    if (currentPage === 'collection') {
-      loadMinerals();
-    }
-  }, [searchTerm, colorFilter, locationFilter, rockTypeFilter, sortBy]);
-
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  const showPage = (page: string) => {
-    if (page === 'admin') {
-      if (!isAuthenticated) {
-        setShowPasswordModal(true);
-        return;
+  // Define functions before useEffect hooks
+  const loadStats = async () => {
+    try {
+      const response = await fetch('/api/stats');
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
       }
+    } catch (error) {
+      console.error('Fehler beim Laden der Statistiken:', error);
     }
-    setCurrentPage(page);
-    setMobileMenuOpen(false);
+  };
+
+  const loadMinerals = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        search: searchTerm,
+        color: colorFilter,
+        location: locationFilter,
+        rock_type: rockTypeFilter,
+        sort: sortBy
+      });
+      
+      const response = await fetch(`/api/minerals?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMinerals(data);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Mineralien:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadShowcases = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/showcases');
+      if (response.ok) {
+        const data = await response.json();
+        setShowcases(data);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Vitrinen:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadFilterOptions = async () => {
+    try {
+      const response = await fetch('/api/filter-options');
+      if (response.ok) {
+        const data = await response.json();
+        setFilterOptions(data);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Filteroptionen:', error);
+    }
   };
 
   const loadShelves = async () => {
@@ -100,18 +123,6 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Fehler beim Laden der Regale:', error);
-    }
-  };
-
-  const loadStats = async () => {
-    try {
-      const response = await fetch('/api/stats');
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Statistiken:', error);
     }
   };
 
@@ -131,12 +142,46 @@ export default function Home() {
     setRockTypeFilter('');
   };
 
+  // Calculate hasActiveFilters
   const hasActiveFilters = searchTerm || colorFilter || locationFilter || rockTypeFilter;
+
+  // useEffect hooks
+  useEffect(() => {
+    loadStats();
+    loadShelves();
+    checkAuthentication();
+  }, []);
+
+  useEffect(() => {
+    if (currentPage === 'collection') {
+      loadMinerals();
+      loadFilterOptions();
+    } else if (currentPage === 'vitrines') {
+      loadShowcases();
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (currentPage === 'collection') {
+      loadMinerals();
+    }
+  }, [searchTerm, colorFilter, locationFilter, rockTypeFilter, sortBy]);
+
+  const showPage = (page: string) => {
+    if (page === 'admin') {
+      if (!isAuthenticated) {
+        setShowPasswordModal(true);
+        return;
+      }
+    }
+    setCurrentPage(page);
+    setMobileMenuOpen(false);
+  };
 
   return (
     <>
       <Head>
-        <title>Mineraliensammlung - Samuel von Pufendorf Gymnasium FlÃ¶ha</title>
+        <title>Mineraliensammlung - Samuel von Pufendorf Gymnasium Flöha</title>
         <meta name="description" content="Entdecken Sie die Sammlung seltener Mineralien und Gesteine des Samuel von Pufendorf Gymnasium." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

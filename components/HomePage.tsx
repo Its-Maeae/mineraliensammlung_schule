@@ -50,7 +50,7 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
             </h1>
             <p className="hero-description">
               Entdecken Sie die umfangreiche Sammlung seltener Mineralien und Gesteine 
-              des Samuel von Pufendorf Gymnasiums FlÃ¶ha auf eine interaktive Art.
+              des Samuel von Pufendorf Gymnasiums Flöha auf eine interaktive Art.
             </p>
             <div className="hero-buttons">
               <button className="btn btn-primary" onClick={() => showPage('collection')}>
@@ -63,12 +63,12 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
           </div>
           
           <div className="hero-visual">
-            <div className="hero-crystal">ðŸ'Ž</div>
+            <div className="hero-crystal">💎</div>
             <div className="hero-particles">
-              <span className="particle">âœ¨</span>
-              <span className="particle">ðŸ"¬</span>
-              <span className="particle">â­</span>
-              <span className="particle">ðŸ'«</span>
+              <span className="particle">✨</span>
+              <span className="particle">🔬</span>
+              <span className="particle">⭐­</span>
+              <span className="particle">💫</span>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
           
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">ðŸ"</div>
+              <div className="feature-icon">🔍</div>
               <h3 className="feature-title">Intelligente Suche</h3>
               <p className="feature-description">
                 Suchen Sie nach Namen, Steinnummer oder Eigenschaften. 
@@ -119,8 +119,8 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">ðŸŽ¯</div>
-              <h3 className="feature-title">PrÃ¤zise Filter</h3>
+              <div className="feature-icon">🎯</div>
+              <h3 className="feature-title">Präzise Filter</h3>
               <p className="feature-description">
                 Filtern Sie nach Farbe, Fundort, Gesteinsart oder Standort. 
                 Finden Sie genau das gesuchte Mineral.
@@ -128,7 +128,7 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">ðŸ"Š</div>
+              <div className="feature-icon">📊</div>
               <h3 className="feature-title">Detaillierte Dokumentation</h3>
               <p className="feature-description">
                 Jedes Mineral ist wissenschaftlich dokumentiert mit 
@@ -144,9 +144,9 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
         <div className="container">
           <div className="about-content">
             <div className="about-text">
-              <h2 className="about-title">Ãœber die Sammlung</h2>
+              <h2 className="about-title">Über die Sammlung</h2>
               <p className="about-description">
-                Diese Sammlung ist Eigentum der Samuel von Pufendorf Schule in FlÃ¶ha. 
+                Diese Sammlung ist Eigentum der Samuel von Pufendorf Schule in Flöha. 
                 Sowohl Lehrer als auch andere Personen trugen zu dieser Sammlung bei.
               </p>
               <p className="about-description">
@@ -157,14 +157,14 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
             
             <div className="about-visual">
               <div className="about-card">
-                <div className="about-card-icon">ðŸŒ</div>
+                <div className="about-card-icon">🌍</div>
                 <h4>Weltweite Fundorte</h4>
                 <p>Mineralien aus verschiedensten Fundorten</p>
               </div>
               <div className="about-card">
-                <div className="about-card-icon">ðŸ"¬</div>
+                <div className="about-card-icon">🔬</div>
                 <h4>Wissenschaftlich dokumentiert</h4>
-                <p>PrÃ¤zise Katalogisierung von SchÃ¼lern dieser Schule</p>
+                <p>Präzise Katalogisierung von Schülern dieser Schule</p>
               </div>
             </div>
           </div>
@@ -180,51 +180,51 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
               
               <div className="impressum-grid">
                 <div className="impressum-card">
-                  <h3>ðŸ'¤ Kontaktperson</h3>
+                  <h3>👤 Kontaktperson</h3>
                   <p><strong>Marius Schmieder (Digitalisierung)</strong></p>
-                  <p>SchÃ¼ler der 10c</p>
-                  <p>ðŸ"ž 03726 123456</p>
-                  <p>âœ‰ï¸ <a href="mailto:marius-schmieder@gymnasium-floeha.lernsax.de">
+                  <p>Schüler der 10c</p>
+                  <p>📞 03726 123456</p>
+                  <p>✉️ <a href="mailto:marius-schmieder@gymnasium-floeha.lernsax.de">
                     marius-schmieder@gymnasium-floeha.lernsax.de
                   </a></p>
                 </div>
 
                 <div className="impressum-card">
-                  <h3>ðŸ'¤ Kontaktperson</h3>
+                  <h3>👤 Kontaktperson</h3>
                   <p><strong>Charlie Espig (Bestimmung)</strong></p>
-                  <p>SchÃ¼ler der 10c</p>
-                  <p>ðŸ"ž 03726 123456</p>
-                  <p>âœ‰ï¸ <a href="mailto:charlie-espig@gymnasium-floeha.lernsax.de">
+                  <p>Schüler der 10c</p>
+                  <p>📞 03726 123456</p>
+                  <p>✉️ <a href="mailto:charlie-espig@gymnasium-floeha.lernsax.de">
                     charlie-espig@gymnasium-floeha.lernsax.de
                   </a></p>
                 </div>
 
                 <div className="impressum-card">
-                  <h3>ðŸ'¤ Kontaktperson</h3>
+                  <h3>👤 Kontaktperson</h3>
                   <p><strong>Manuela Barthel (Projektleitung)</strong></p>
                   <p>Fachbereich Geologie</p>
-                  <p>ðŸ"ž 03726 123456</p>
-                  <p>âœ‰ï¸ <a href="mailto:manuela-bathel@gymnasium-floeha.lernsax.de">
+                  <p>📞 03726 123456</p>
+                  <p>✉️ <a href="mailto:manuela-bathel@gymnasium-floeha.lernsax.de">
                     manuela-barthel@gymnasium-floeha.lernsax.de
                   </a></p>
                 </div>
 
                 <div className="impressum-card">
                   <h3>Bildungseinrichtung</h3>
-                  <p><strong>Samuel von Pufendorf Gymnasium FlÃ¶ha</strong></p>
-                  <p>TurnerstraÃŸe 16</p>
-                  <p>09557 FlÃ¶ha, Deutschland</p>
-                  <p>ðŸŒ <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
+                  <p><strong>Samuel von Pufendorf Gymnasium Flöha</strong></p>
+                  <p>Turnerstraße 16</p>
+                  <p>09557 Flöha, Deutschland</p>
+                  <p>🌐 <a href="https://gymnasium-floeha.de" target="_blank" rel="noopener noreferrer">
                       gymnasium-floeha.de
                     </a>
                   </p>
                 </div>
                 
                 <div className="impressum-card">
-                  <h3>ðŸ'¥ Mitwirkende</h3>
-                  <p>â€¢ Marius Schmieder (Digitalisierung)</p>
-                  <p>â€¢ Charlie Espig (Bestimmung)</p>
-                  <p>â€¢ Manuela Barthel (Projektleitung)</p>
+                  <h3>👥 Mitwirkende</h3>
+                  <p>• Marius Schmieder (Digitalisierung)</p>
+                  <p>• Charlie Espig (Bestimmung)</p>
+                  <p>• Manuela Barthel (Projektleitung)</p>
                 </div>
                 
                 <div className="impressum-card">
@@ -243,7 +243,7 @@ export default function HomePage({ showPage, stats, lastUpdated, setLastUpdated 
               
               <div className="impressum-links">
                 <button className="impressum-link" onClick={showImpressumPage}>
-                  VollstÃ¤ndiges Impressum
+                  Vollständiges Impressum
                 </button>
                 <button className="impressum-link" onClick={showQuellenPage}>
                   Quellen & Literatur
