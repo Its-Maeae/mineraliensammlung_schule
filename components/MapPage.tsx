@@ -17,6 +17,7 @@ interface MapPageProps {
   shelves: any[];
   loadStats: () => void;
   setMinerals: (minerals: Mineral[]) => void;
+  currentPage: string; // Hinzugefügt um Page-Wechsel zu erkennen
 }
 
 // Global variable to track Leaflet loading state
@@ -41,25 +42,74 @@ export default function MapPage({
   setEditImage,
   shelves,
   loadStats,
-  setMinerals
+  setMinerals,
+  currentPage
 }: MapPageProps) {
   const [minerals, setMineralsLocal] = useState<Mineral[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const isMapVisible = currentPage === 'map';
 
   // Check if Leaflet is already loaded
   useEffect(() => {
     if (typeof window !== 'undefined' && window.L) {
       setLeafletLoaded(true);
-      setMapLoaded(true);
     } else {
       loadLeaflet();
     }
   }, []);
+
+  // Mineralien einmalig laden
+  useEffect(() => {
+    const loadMinerals = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/minerals');
+        if (response.ok) {
+          const data = await response.json();
+          const mineralsWithCoords = data.filter((mineral: Mineral) => 
+            mineral.latitude && mineral.longitude
+          );
+          setMineralsLocal(mineralsWithCoords);
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Mineralien:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMinerals();
+  }, []);
+
+  // Map initialisieren wenn die Page sichtbar wird
+  useEffect(() => {
+    if (isMapVisible && leafletLoaded && mapRef.current && !loading) {
+      // Kurze Verzögerung um sicherzustellen dass DOM bereit ist
+      const timer = setTimeout(() => {
+        initializeMap();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isMapVisible, leafletLoaded, loading]);
+
+  // Map aufräumen wenn Page nicht mehr sichtbar
+  useEffect(() => {
+    if (!isMapVisible && mapInstance.current) {
+      cleanupMap();
+    }
+  }, [isMapVisible]);
+
+  // Marker aktualisieren wenn Mineralien geladen sind und Map existiert
+  useEffect(() => {
+    if (mapInstance.current && minerals.length > 0 && isMapVisible) {
+      updateMarkers();
+    }
+  }, [minerals, isMapVisible]);
 
   const loadLeaflet = () => {
     // Prevent multiple loading attempts
@@ -83,7 +133,6 @@ export default function MapPage({
       script.crossOrigin = '';
       script.onload = () => {
         setLeafletLoaded(true);
-        setMapLoaded(true);
       };
       script.onerror = () => {
         console.error('Failed to load Leaflet');
@@ -93,55 +142,45 @@ export default function MapPage({
     }
   };
 
-  // Mineralien laden
-  useEffect(() => {
-    const loadMinerals = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/minerals');
-        if (response.ok) {
-          const data = await response.json();
-          const mineralsWithCoords = data.filter((mineral: Mineral) => 
-            mineral.latitude && mineral.longitude
-          );
-          setMineralsLocal(mineralsWithCoords);
+  const cleanupMap = () => {
+    try {
+      // Marker entfernen
+      markersRef.current.forEach(marker => {
+        if (mapInstance.current) {
+          mapInstance.current.removeLayer(marker);
         }
-      } catch (error) {
-        console.error('Fehler beim Laden der Mineralien:', error);
-      } finally {
-        setLoading(false);
+      });
+      markersRef.current = [];
+
+      // Map instance entfernen
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
       }
-    };
-
-    loadMinerals();
-  }, []);
-
-  // Karte initialisieren
-  useEffect(() => {
-    if (leafletLoaded && mapRef.current && !mapInstance.current && window.L) {
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
-        initializeMap();
-      }, 100);
+    } catch (error) {
+      console.error('Error cleaning up map:', error);
     }
-  }, [leafletLoaded]);
-
-  // Marker aktualisieren wenn sich Mineralien ändern
-  useEffect(() => {
-    if (mapInstance.current && minerals.length > 0) {
-      updateMarkers();
-    }
-  }, [minerals]);
+  };
 
   const initializeMap = () => {
-    if (!mapRef.current || !window.L || mapInstance.current) return;
+    // Cleanup bestehende Map
+    cleanupMap();
+
+    if (!mapRef.current || !window.L) return;
 
     try {
+      // Stelle sicher dass das Container-Element die richtige Größe hat
+      if (mapRef.current) {
+        mapRef.current.style.height = '100vh';
+        mapRef.current.style.width = '100%';
+      }
+
       const map = window.L.map(mapRef.current, {
         center: [51.1657, 10.4515], // Deutschland Zentrum
         zoom: 6,
         zoomControl: true,
-        attributionControl: true
+        attributionControl: true,
+        preferCanvas: false
       });
 
       // OpenStreetMap Tiles hinzufügen
@@ -152,17 +191,21 @@ export default function MapPage({
 
       mapInstance.current = map;
       
-      // Initial markers if minerals are already loaded
-      if (minerals.length > 0) {
-        updateMarkers();
-      }
+      // Force resize after short delay
+      setTimeout(() => {
+        if (mapInstance.current) {
+          mapInstance.current.invalidateSize();
+          updateMarkers();
+        }
+      }, 200);
+      
     } catch (error) {
       console.error('Error initializing map:', error);
     }
   };
 
   const updateMarkers = () => {
-    if (!mapInstance.current || !window.L) return;
+    if (!mapInstance.current || !window.L || minerals.length === 0) return;
 
     try {
       // Alte Marker entfernen
@@ -310,6 +353,13 @@ export default function MapPage({
     }
   };
 
+  // Cleanup beim Unmount
+  useEffect(() => {
+    return () => {
+      cleanupMap();
+    };
+  }, []);
+
   if (loading) {
     return (
       <section className="page active">
@@ -363,7 +413,7 @@ export default function MapPage({
             }}
           />
           
-          {!mapLoaded && (
+          {(!leafletLoaded || !mapInstance.current) && (
             <div style={{
               position: 'absolute',
               top: '50%',
