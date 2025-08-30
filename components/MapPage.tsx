@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Mineral } from '../types';
 import MineralModal from './MineralModal';
 
@@ -17,7 +17,7 @@ interface MapPageProps {
   shelves: any[];
   loadStats: () => void;
   setMinerals: (minerals: Mineral[]) => void;
-  currentPage: string; // Hinzugefügt um Page-Wechsel zu erkennen
+  currentPage: string;
 }
 
 // Global variable to track Leaflet loading state
@@ -47,22 +47,14 @@ export default function MapPage({
 }: MapPageProps) {
   const [minerals, setMineralsLocal] = useState<Mineral[]>([]);
   const [loading, setLoading] = useState(true);
-  const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const isMapVisible = currentPage === 'map';
+  const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check if Leaflet is already loaded
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.L) {
-      setLeafletLoaded(true);
-    } else {
-      loadLeaflet();
-    }
-  }, []);
-
-  // Mineralien einmalig laden
+  // Mineralien laden
   useEffect(() => {
     const loadMinerals = async () => {
       try {
@@ -77,6 +69,7 @@ export default function MapPage({
         }
       } catch (error) {
         console.error('Fehler beim Laden der Mineralien:', error);
+        setMapError('Fehler beim Laden der Mineralien');
       } finally {
         setLoading(false);
       }
@@ -85,133 +78,204 @@ export default function MapPage({
     loadMinerals();
   }, []);
 
-  // Map initialisieren wenn die Page sichtbar wird
+  // Leaflet laden und Map initialisieren wenn Page sichtbar wird
   useEffect(() => {
-    if (isMapVisible && leafletLoaded && mapRef.current && !loading) {
-      // Kurze Verzögerung um sicherzustellen dass DOM bereit ist
-      const timer = setTimeout(() => {
-        initializeMap();
-      }, 100);
-      
-      return () => clearTimeout(timer);
+    if (isMapVisible && !loading) {
+      initializeLeafletAndMap();
     }
-  }, [isMapVisible, leafletLoaded, loading]);
 
-  // Map aufräumen wenn Page nicht mehr sichtbar
+    return () => {
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
+    };
+  }, [isMapVisible, loading]);
+
+  // Cleanup wenn Page nicht mehr sichtbar
   useEffect(() => {
-    if (!isMapVisible && mapInstance.current) {
+    if (!isMapVisible) {
       cleanupMap();
     }
   }, [isMapVisible]);
 
-  // Marker aktualisieren wenn Mineralien geladen sind und Map existiert
+  // Cleanup beim Unmount
   useEffect(() => {
-    if (mapInstance.current && minerals.length > 0 && isMapVisible) {
-      updateMarkers();
+    return () => {
+      cleanupMap();
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const initializeLeafletAndMap = useCallback(async () => {
+    if (!mapRef.current) return;
+
+    try {
+      setMapError(null);
+      
+      // Warte auf Leaflet
+      await ensureLeafletLoaded();
+      
+      // Kurze Verzögerung für DOM readiness
+      initTimeoutRef.current = setTimeout(() => {
+        createMap();
+      }, 150);
+      
+    } catch (error) {
+      console.error('Error initializing Leaflet and Map:', error);
+      setMapError('Fehler beim Laden der Karte');
     }
-  }, [minerals, isMapVisible]);
+  }, []);
 
-  const loadLeaflet = () => {
-    // Prevent multiple loading attempts
-    if (leafletLoaded || typeof window === 'undefined') return;
+  const ensureLeafletLoaded = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // Bereits geladen?
+      if (window.L) {
+        resolve();
+        return;
+      }
 
-    // CSS laden (falls noch nicht vorhanden)
-    if (!document.querySelector('link[href*="leaflet"]')) {
-      const cssLink = document.createElement('link');
-      cssLink.rel = 'stylesheet';
-      cssLink.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      cssLink.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-      cssLink.crossOrigin = '';
-      document.head.appendChild(cssLink);
-    }
+      // CSS laden
+      if (!document.querySelector('link[href*="leaflet"]')) {
+        const cssLink = document.createElement('link');
+        cssLink.rel = 'stylesheet';
+        cssLink.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        cssLink.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        cssLink.crossOrigin = '';
+        document.head.appendChild(cssLink);
+      }
 
-    // JavaScript laden
-    if (!window.L) {
+      // Prüfe ob Script bereits vorhanden
+      const existingScript = document.querySelector('script[src*="leaflet"]');
+      if (existingScript) {
+        // Warte auf das Laden
+        const checkLoaded = () => {
+          if (window.L) {
+            resolve();
+          } else {
+            setTimeout(checkLoaded, 100);
+          }
+        };
+        checkLoaded();
+        return;
+      }
+
+      // JavaScript laden
       const script = document.createElement('script');
       script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
       script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
       script.crossOrigin = '';
+      
       script.onload = () => {
-        setLeafletLoaded(true);
+        // Zusätzliche Wartezeit für vollständige Initialisierung
+        setTimeout(() => {
+          if (window.L) {
+            resolve();
+          } else {
+            reject(new Error('Leaflet loaded but L object not available'));
+          }
+        }, 100);
       };
+      
       script.onerror = () => {
-        console.error('Failed to load Leaflet');
-        setLoading(false);
+        reject(new Error('Failed to load Leaflet script'));
       };
+      
       document.head.appendChild(script);
-    }
+    });
   };
 
-  const cleanupMap = () => {
+  const cleanupMap = useCallback(() => {
     try {
+      // Timeout löschen
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+        initTimeoutRef.current = null;
+      }
+
       // Marker entfernen
       markersRef.current.forEach(marker => {
-        if (mapInstance.current) {
-          mapInstance.current.removeLayer(marker);
+        try {
+          if (mapInstance.current) {
+            mapInstance.current.removeLayer(marker);
+          }
+        } catch (e) {
+          // Ignoriere Fehler beim Marker-Entfernen
         }
       });
       markersRef.current = [];
 
       // Map instance entfernen
       if (mapInstance.current) {
-        mapInstance.current.remove();
+        try {
+          mapInstance.current.remove();
+        } catch (e) {
+          console.warn('Error removing map:', e);
+        }
         mapInstance.current = null;
       }
     } catch (error) {
       console.error('Error cleaning up map:', error);
     }
-  };
+  }, []);
 
-  const initializeMap = () => {
-    // Cleanup bestehende Map
-    cleanupMap();
-
-    if (!mapRef.current || !window.L) return;
+  const createMap = useCallback(() => {
+    if (!mapRef.current || !window.L || mapInstance.current) return;
 
     try {
-      // Stelle sicher dass das Container-Element die richtige Größe hat
-      if (mapRef.current) {
-        mapRef.current.style.height = '100vh';
-        mapRef.current.style.width = '100%';
-      }
+      // Cleanup vorher
+      cleanupMap();
 
-      const map = window.L.map(mapRef.current, {
-        center: [51.1657, 10.4515], // Deutschland Zentrum
+      // Container vorbereiten
+      const container = mapRef.current;
+      container.style.height = '100vh';
+      container.style.width = '100%';
+      
+      // Map erstellen
+      const map = window.L.map(container, {
+        center: [51.1657, 10.4515],
         zoom: 6,
         zoomControl: true,
         attributionControl: true,
         preferCanvas: false
       });
 
-      // OpenStreetMap Tiles hinzufügen
-      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // Tile Layer hinzufügen
+      const tileLayer = window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
-      }).addTo(map);
-
+      });
+      
+      tileLayer.addTo(map);
       mapInstance.current = map;
-      
-      // Force resize after short delay
-      setTimeout(() => {
-        if (mapInstance.current) {
-          mapInstance.current.invalidateSize();
-          updateMarkers();
-        }
-      }, 200);
-      
-    } catch (error) {
-      console.error('Error initializing map:', error);
-    }
-  };
 
-  const updateMarkers = () => {
+      // Event-Listener für vollständiges Laden
+      map.whenReady(() => {
+        setTimeout(() => {
+          if (mapInstance.current) {
+            mapInstance.current.invalidateSize();
+            updateMarkers();
+          }
+        }, 100);
+      });
+
+    } catch (error) {
+      console.error('Error creating map:', error);
+      setMapError('Fehler beim Erstellen der Karte');
+    }
+  }, [minerals]);
+
+  const updateMarkers = useCallback(() => {
     if (!mapInstance.current || !window.L || minerals.length === 0) return;
 
     try {
       // Alte Marker entfernen
       markersRef.current.forEach(marker => {
-        if (mapInstance.current) {
+        try {
           mapInstance.current.removeLayer(marker);
+        } catch (e) {
+          // Ignoriere Fehler
         }
       });
       markersRef.current = [];
@@ -219,48 +283,50 @@ export default function MapPage({
       // Neue Marker erstellen
       minerals.forEach(mineral => {
         if (mineral.latitude && mineral.longitude) {
-          // Custom Icon erstellen basierend auf der Farbe
-          const iconColor = getColorForMineral(mineral.color);
-          const customIcon = window.L.divIcon({
-            className: 'custom-mineral-marker',
-            html: `<div style="
-              width: 20px; 
-              height: 20px; 
-              background-color: ${iconColor}; 
-              border: 2px solid white; 
-              border-radius: 50%; 
-              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 12px;
-            ">💎</div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-          });
+          try {
+            const iconColor = getColorForMineral(mineral.color);
+            const customIcon = window.L.divIcon({
+              className: 'custom-mineral-marker',
+              html: `<div style="
+                width: 20px; 
+                height: 20px; 
+                background-color: ${iconColor}; 
+                border: 2px solid white; 
+                border-radius: 50%; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+              ">💎</div>`,
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            });
 
-          const marker = window.L.marker([mineral.latitude, mineral.longitude], {
-            icon: customIcon
-          }).addTo(mapInstance.current);
+            const marker = window.L.marker([mineral.latitude, mineral.longitude], {
+              icon: customIcon
+            }).addTo(mapInstance.current);
 
-          // Popup mit Mineral-Informationen
-          const popupContent = `
-            <div style="padding: 10px; max-width: 200px;">
-              <h3 style="margin: 0 0 8px 0; font-size: 16px;">${mineral.name}</h3>
-              <p style="margin: 4px 0; font-size: 14px;"><strong>Nummer:</strong> ${mineral.number}</p>
-              <p style="margin: 4px 0; font-size: 14px;"><strong>Farbe:</strong> ${mineral.color || 'Nicht angegeben'}</p>
-              <p style="margin: 4px 0; font-size: 14px;"><strong>Fundort:</strong> ${mineral.location || 'Unbekannt'}</p>
-              <button 
-                onclick="window.openMineralDetails(${mineral.id})" 
-                style="margin-top: 8px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
-              >
-                Details anzeigen
-              </button>
-            </div>
-          `;
+            const popupContent = `
+              <div style="padding: 10px; max-width: 200px;">
+                <h3 style="margin: 0 0 8px 0; font-size: 16px;">${mineral.name}</h3>
+                <p style="margin: 4px 0; font-size: 14px;"><strong>Nummer:</strong> ${mineral.number}</p>
+                <p style="margin: 4px 0; font-size: 14px;"><strong>Farbe:</strong> ${mineral.color || 'Nicht angegeben'}</p>
+                <p style="margin: 4px 0; font-size: 14px;"><strong>Fundort:</strong> ${mineral.location || 'Unbekannt'}</p>
+                <button 
+                  onclick="window.openMineralDetails(${mineral.id})" 
+                  style="margin-top: 8px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                >
+                  Details anzeigen
+                </button>
+              </div>
+            `;
 
-          marker.bindPopup(popupContent);
-          markersRef.current.push(marker);
+            marker.bindPopup(popupContent);
+            markersRef.current.push(marker);
+          } catch (error) {
+            console.error('Error creating marker for mineral:', mineral.id, error);
+          }
         }
       });
 
@@ -280,7 +346,7 @@ export default function MapPage({
     } catch (error) {
       console.error('Error updating markers:', error);
     }
-  };
+  }, [minerals, setSelectedMineral, setShowMineralModal]);
 
   const getColorForMineral = (color?: string) => {
     const colorMap: { [key: string]: string } = {
@@ -353,13 +419,6 @@ export default function MapPage({
     }
   };
 
-  // Cleanup beim Unmount
-  useEffect(() => {
-    return () => {
-      cleanupMap();
-    };
-  }, []);
-
   if (loading) {
     return (
       <section className="page active">
@@ -372,7 +431,45 @@ export default function MapPage({
             fontSize: '18px',
             color: '#666'
           }}>
-            Lade Karte und Mineralien...
+            Lade Mineralien...
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (mapError) {
+    return (
+      <section className="page active">
+        <div className="container">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '60vh',
+            fontSize: '18px',
+            color: '#ff4444',
+            textAlign: 'center'
+          }}>
+            <div>{mapError}</div>
+            <button 
+              onClick={() => {
+                setMapError(null);
+                initializeLeafletAndMap();
+              }}
+              style={{
+                marginTop: '20px',
+                padding: '10px 20px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Erneut versuchen
+            </button>
           </div>
         </div>
       </section>
@@ -409,11 +506,12 @@ export default function MapPage({
               width: '100%', 
               height: '100vh',
               borderRadius: '0',
-              zIndex: 1
+              zIndex: 1,
+              backgroundColor: '#f0f0f0'
             }}
           />
           
-          {(!leafletLoaded || !mapInstance.current) && (
+          {!mapInstance.current && (
             <div style={{
               position: 'absolute',
               top: '50%',
@@ -426,9 +524,18 @@ export default function MapPage({
               borderRadius: '8px',
               boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
             }}>
-              <div style={{ fontSize: '18px', color: '#666' }}>
-                OpenStreetMap wird geladen...
+              <div style={{ fontSize: '18px', color: '#666', marginBottom: '10px' }}>
+                Karte wird initialisiert...
               </div>
+              <div style={{ 
+                width: '40px', 
+                height: '40px', 
+                border: '4px solid #f3f3f3',
+                borderTop: '4px solid #007bff',
+                borderRadius: '50%',
+                animation: 'spin 2s linear infinite',
+                margin: '0 auto'
+              }} />
             </div>
           )}
         </div>
@@ -443,6 +550,13 @@ export default function MapPage({
           onDelete={handleDelete}
         />
       )}
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   );
 }
