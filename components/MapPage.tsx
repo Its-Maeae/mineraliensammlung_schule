@@ -406,8 +406,8 @@ export default function MapPage({
           <div 
             ref={mapRef} 
             style={{ 
-              width: '100%', 
-              height: '100vh',
+              width: '100px', 
+              height: '100px',
               borderRadius: '0',
               zIndex: 1
             }}
