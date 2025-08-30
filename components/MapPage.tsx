@@ -48,6 +48,7 @@ export default function MapPage({
   const [minerals, setMineralsLocal] = useState<Mineral[]>([]);
   const [loading, setLoading] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [mapInitialized, setMapInitialized] = useState(false); // New state for tracking initialization
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -80,16 +81,17 @@ export default function MapPage({
 
   // Leaflet laden und Map initialisieren wenn Page sichtbar wird
   useEffect(() => {
-    if (isMapVisible && !loading) {
+    if (isMapVisible && !loading && !mapInitialized) {
       initializeLeafletAndMap();
     }
+  }, [isMapVisible, loading, mapInitialized]);
 
-    return () => {
-      if (initTimeoutRef.current) {
-        clearTimeout(initTimeoutRef.current);
-      }
-    };
-  }, [isMapVisible, loading]);
+  // Update markers when minerals change and map is ready
+  useEffect(() => {
+    if (mapInitialized && mapInstance.current && minerals.length > 0) {
+      updateMarkers();
+    }
+  }, [minerals, mapInitialized]);
 
   // Cleanup wenn Page nicht mehr sichtbar
   useEffect(() => {
@@ -215,6 +217,9 @@ export default function MapPage({
         }
         mapInstance.current = null;
       }
+
+      // Reset initialization state
+      setMapInitialized(false);
     } catch (error) {
       console.error('Error cleaning up map:', error);
     }
@@ -255,7 +260,8 @@ export default function MapPage({
         setTimeout(() => {
           if (mapInstance.current) {
             mapInstance.current.invalidateSize();
-            updateMarkers();
+            setMapInitialized(true); // Set initialization as complete
+            // Update markers will be called automatically via useEffect
           }
         }, 100);
       });
@@ -264,10 +270,13 @@ export default function MapPage({
       console.error('Error creating map:', error);
       setMapError('Fehler beim Erstellen der Karte');
     }
-  }, [minerals]);
+  }, []);
 
   const updateMarkers = useCallback(() => {
-    if (!mapInstance.current || !window.L || minerals.length === 0) return;
+    if (!mapInstance.current || !window.L) {
+      console.log('Map not ready for markers');
+      return;
+    }
 
     try {
       // Alte Marker entfernen
@@ -279,6 +288,8 @@ export default function MapPage({
         }
       });
       markersRef.current = [];
+
+      console.log('Adding markers for', minerals.length, 'minerals');
 
       // Neue Marker erstellen
       minerals.forEach(mineral => {
@@ -343,6 +354,8 @@ export default function MapPage({
           console.error('Fehler beim Laden der Mineral-Details:', error);
         }
       };
+
+      console.log('Successfully added', markersRef.current.length, 'markers');
     } catch (error) {
       console.error('Error updating markers:', error);
     }
@@ -456,6 +469,7 @@ export default function MapPage({
             <button 
               onClick={() => {
                 setMapError(null);
+                setMapInitialized(false);
                 initializeLeafletAndMap();
               }}
               style={{
@@ -511,7 +525,7 @@ export default function MapPage({
             }}
           />
           
-          {!mapInstance.current && (
+          {!mapInitialized && !mapError && (
             <div style={{
               position: 'absolute',
               top: '50%',
