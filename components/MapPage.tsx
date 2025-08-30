@@ -518,7 +518,7 @@ export default function MapPage({
           <div 
             ref={mapRef} 
             style={{ 
-              width: '100%', 
+              width: '150%', 
               height: '100vh',
               borderRadius: '0',
               zIndex: 1,
