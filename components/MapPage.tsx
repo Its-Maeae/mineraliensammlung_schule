@@ -495,7 +495,7 @@ export default function MapPage({
       <section className="page active">
         <div className="container" style={{ height: '100vh', padding: 0, position: 'relative' }}>
           <div style={{ 
-            position: 'absolute', 
+            position: 'fixed', 
             top: '50%', 
             left: '20px', 
             transform: 'translateY(-50%)',
