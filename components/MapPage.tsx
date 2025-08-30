@@ -496,7 +496,7 @@ export default function MapPage({
         <div className="container" style={{ height: '100vh', padding: 0, position: 'relative' }}>
           <div style={{ 
             position: 'fixed', 
-            top: '50%', 
+            top: '30%', 
             left: '20px', 
             transform: 'translateY(-50%)',
             zIndex: 1000, 
