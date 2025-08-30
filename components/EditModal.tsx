@@ -1,4 +1,5 @@
 import React from 'react';
+import MapSelector from './MapSelector';
 
 interface EditModalProps {
   editMode: 'mineral' | 'showcase' | 'shelf';
@@ -219,6 +220,23 @@ export default function EditModal({
                   value={formData.location || ''}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                 />
+              </div>
+              <div className="form-group">
+                <label>Fundort auf Karte</label>
+                <MapSelector
+                  latitude={formData.latitude}
+                  longitude={formData.longitude}
+                  onLocationSelect={(lat, lng) => setFormData({
+                    ...formData, 
+                    latitude: lat, 
+                    longitude: lng
+                  })}
+                />
+                {formData.latitude && formData.longitude && (
+                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                    Koordinaten: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label>Kaufort</label>

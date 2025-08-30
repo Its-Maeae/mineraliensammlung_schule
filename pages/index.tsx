@@ -10,6 +10,7 @@ import AdminPage from '../components/AdminPage';
 import LegalPages from '../components/LegalPages';
 import PasswordModal from '../components/PasswordModal';
 import EditModal from '../components/EditModal';
+import MapPage from '../components/MapPage';
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -278,6 +279,25 @@ export default function Home() {
             setShowMineralModal={setShowMineralModal}
             shelves={shelves}
             loadStats={loadStats}
+          />
+        )}
+
+        {currentPage === 'map' && (
+          <MapPage 
+            isAuthenticated={isAuthenticated}
+            selectedMineral={selectedMineral}
+            setSelectedMineral={setSelectedMineral}
+            showMineralModal={showMineralModal}
+            setShowMineralModal={setShowMineralModal}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            editFormData={editFormData}
+            setEditFormData={setEditFormData}
+            editImage={editImage}
+            setEditImage={setEditImage}
+            shelves={shelves}
+            loadStats={loadStats}
+            setMinerals={setMinerals}
           />
         )}
 

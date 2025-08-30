@@ -6,6 +6,8 @@ export interface Mineral {
   description?: string;
   location?: string;
   purchase_location?: string;
+  latitude?: number;
+  longitude?: number;
   rock_type?: string;
   shelf_id?: number;
   image_path?: string;

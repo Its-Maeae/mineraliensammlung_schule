@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Stats } from '../types';
+import MapSelector from './MapSelector'; // Import der separaten MapSelector-Komponente
 
 interface AdminPageProps {
   isAuthenticated: boolean;
@@ -15,6 +16,8 @@ interface MineralFormData {
   purchase_location: string;
   rock_type: string;
   shelf_id: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface ShelfOption {
@@ -64,13 +67,13 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
     location: '',
     purchase_location: '',
     rock_type: '',
-    shelf_id: ''
+    shelf_id: '',
+    latitude: null,
+    longitude: null
   });
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [shelves, setShelves] = useState<ShelfOption[]>([]);
-  
-  // States für die Nummer-Validierung
   const [numberExists, setNumberExists] = useState(false);
   const [checkingNumber, setCheckingNumber] = useState(false);
   const [numberCheckTimeout, setNumberCheckTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -132,6 +135,14 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
     setNumberCheckTimeout(timeout);
   };
 
+  const handleLocationSelect = (lat: number, lng: number) => {
+    setFormData({
+      ...formData,
+      latitude: lat,
+      longitude: lng
+    });
+  };
+
   // Cleanup beim Unmount
   useEffect(() => {
     return () => {
@@ -144,7 +155,6 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Überprüfung vor dem Absenden
     if (numberExists) {
       alert('Diese Steinnummer existiert bereits. Bitte wählen Sie eine andere Nummer.');
       return;
@@ -160,7 +170,9 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
     try {
       const form = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        form.append(key, value);
+        if (value !== null && value !== undefined) {
+          form.append(key, value.toString());
+        }
       });
       if (image) {
         form.append('image', image);
@@ -180,7 +192,9 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
           location: '',
           purchase_location: '',
           rock_type: '',
-          shelf_id: ''
+          shelf_id: '',
+          latitude: null,
+          longitude: null
         });
         setImage(null);
         setNumberExists(false);
@@ -269,7 +283,7 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="location">Fundort</label>
+        <label htmlFor="location">Fundort (Text)</label>
         <input
           type="text"
           id="location"
@@ -278,6 +292,23 @@ function MineralForm({ onSuccess }: { onSuccess: () => void }) {
           placeholder="Geographische Herkunft"
           required
         />
+      </div>
+
+      <div className="form-group">
+        <label>Fundort auf Karte markieren (optional)</label>
+        <p style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>
+          Klicken Sie auf die Karte, um den genauen Fundort zu markieren
+        </p>
+        <MapSelector
+          latitude={formData.latitude}
+          longitude={formData.longitude}
+          onLocationSelect={handleLocationSelect}
+        />
+        {formData.latitude && formData.longitude && (
+          <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+            Koordinaten: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+          </div>
+        )}
       </div>
 
       <div className="form-group">

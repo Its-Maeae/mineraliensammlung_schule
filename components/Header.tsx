@@ -45,6 +45,12 @@ export default function Header({
               Sammlung
             </a>
             <a 
+              className={`nav-link ${currentPage === 'map' ? 'active' : ''}`}
+              onClick={() => showPage('map')}
+            >
+              Karte
+            </a>
+            <a 
               className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`}
               onClick={() => showPage('admin')}
             >
