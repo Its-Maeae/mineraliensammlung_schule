@@ -103,30 +103,6 @@ export default function MapPage({
     }
   }, [mapLoaded]);
 
-  // Cleanup beim Seitenwechsel
-  useEffect(() => {
-    return () => {
-      // Cleanup nur beim echten Unmount, nicht bei Re-renders
-      if (mapInstance.current) {
-        mapInstance.current.off();
-        mapInstance.current.remove();
-        mapInstance.current = null;
-        markersRef.current = [];
-      }
-    };
-  }, []);
-
-  // Cleanup beim Unmount
-  useEffect(() => {
-    return () => {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-      markersRef.current = [];
-    };
-  }, []);
-
   // Marker aktualisieren wenn sich Mineralien ändern
   useEffect(() => {
     if (mapInstance.current && minerals.length > 0) {
@@ -135,26 +111,18 @@ export default function MapPage({
   }, [minerals]);
 
   const initializeMap = () => {
-    if (!mapRef.current || !window.L || mapInstance.current) return;
+    if (!mapRef.current || !window.L) return;
 
-    try {
-      const map = window.L.map(mapRef.current).setView([51.1657, 10.4515], 6); // Deutschland Zentrum
+    const map = window.L.map(mapRef.current).setView([51.1657, 10.4515], 6); // Deutschland Zentrum
 
-      // OpenStreetMap Tiles hinzufügen
-      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19
-      }).addTo(map);
+    // OpenStreetMap Tiles hinzufügen
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
 
-      mapInstance.current = map;
-      
-      // Marker nur hinzufügen wenn Mineralien vorhanden sind
-      if (minerals.length > 0) {
-        updateMarkers();
-      }
-    } catch (error) {
-      console.error('Fehler beim Initialisieren der Karte:', error);
-    }
+    mapInstance.current = map;
+    updateMarkers();
   };
 
   const updateMarkers = () => {
@@ -311,28 +279,16 @@ export default function MapPage({
   return (
     <>
       <section className="page active">
-        <div className="container" style={{ height: '100vh', padding: 0, position: 'relative' }}>
-          <div 
-            ref={mapRef} 
-            style={{ 
-              width: '100%', 
-              height: '100vh',
-              borderRadius: '0'
-            }}
-          />
-          
-          {/* Info-Overlay - jetzt weiter unten positioniert */}
+        <div className="container" style={{ height: '100vh', padding: 0 }}>
           <div style={{ 
             position: 'absolute', 
-            bottom: '20px', 
+            top: '20px', 
             left: '20px', 
             zIndex: 1000, 
-            background: 'rgba(255, 255, 255, 0.95)', 
+            background: 'white', 
             padding: '15px', 
             borderRadius: '8px', 
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            maxWidth: '300px',
-            backdropFilter: 'blur(5px)'
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)' 
           }}>
             <h2 style={{ margin: '0 0 10px 0', fontSize: '18px' }}>Fundorte der Mineralien</h2>
             <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
@@ -343,6 +299,15 @@ export default function MapPage({
             </p>
           </div>
           
+          <div 
+            ref={mapRef} 
+            style={{ 
+              width: '100%', 
+              height: '100vh',
+              borderRadius: '0'
+            }}
+          />
+          
           {!mapLoaded && (
             <div style={{
               position: 'absolute',
@@ -350,11 +315,7 @@ export default function MapPage({
               left: '50%',
               transform: 'translate(-50%, -50%)',
               textAlign: 'center',
-              zIndex: 1001,
-              background: 'rgba(255, 255, 255, 0.9)',
-              padding: '20px',
-              borderRadius: '8px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+              zIndex: 1001
             }}>
               <div className="loading">OpenStreetMap wird geladen...</div>
             </div>
