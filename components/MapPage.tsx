@@ -96,17 +96,25 @@ export default function MapPage({
     loadMinerals();
   }, []);
 
-  // Karte initialisieren - jedes Mal wenn die Komponente gemountet wird
+  // Karte initialisieren
   useEffect(() => {
-    if (mapLoaded && mapRef.current && window.L) {
-      // Alte Karte cleanup falls vorhanden
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
+    if (mapLoaded && mapRef.current && !mapInstance.current && window.L) {
       initializeMap();
     }
   }, [mapLoaded]);
+
+  // Cleanup beim Seitenwechsel
+  useEffect(() => {
+    return () => {
+      // Cleanup nur beim echten Unmount, nicht bei Re-renders
+      if (mapInstance.current) {
+        mapInstance.current.off();
+        mapInstance.current.remove();
+        mapInstance.current = null;
+        markersRef.current = [];
+      }
+    };
+  }, []);
 
   // Cleanup beim Unmount
   useEffect(() => {
@@ -127,18 +135,26 @@ export default function MapPage({
   }, [minerals]);
 
   const initializeMap = () => {
-    if (!mapRef.current || !window.L) return;
+    if (!mapRef.current || !window.L || mapInstance.current) return;
 
-    const map = window.L.map(mapRef.current).setView([51.1657, 10.4515], 6); // Deutschland Zentrum
+    try {
+      const map = window.L.map(mapRef.current).setView([51.1657, 10.4515], 6); // Deutschland Zentrum
 
-    // OpenStreetMap Tiles hinzufügen
-    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    }).addTo(map);
+      // OpenStreetMap Tiles hinzufügen
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+      }).addTo(map);
 
-    mapInstance.current = map;
-    updateMarkers();
+      mapInstance.current = map;
+      
+      // Marker nur hinzufügen wenn Mineralien vorhanden sind
+      if (minerals.length > 0) {
+        updateMarkers();
+      }
+    } catch (error) {
+      console.error('Fehler beim Initialisieren der Karte:', error);
+    }
   };
 
   const updateMarkers = () => {
