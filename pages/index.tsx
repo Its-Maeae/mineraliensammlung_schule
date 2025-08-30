@@ -284,6 +284,7 @@ export default function Home() {
 
         {currentPage === 'map' && (
           <MapPage 
+            currentPage={currentPage}
             isAuthenticated={isAuthenticated}
             selectedMineral={selectedMineral}
             setSelectedMineral={setSelectedMineral}
