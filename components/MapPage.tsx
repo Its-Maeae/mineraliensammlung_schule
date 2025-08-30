@@ -96,12 +96,28 @@ export default function MapPage({
     loadMinerals();
   }, []);
 
-  // Karte initialisieren
+  // Karte initialisieren - jedes Mal wenn die Komponente gemountet wird
   useEffect(() => {
-    if (mapLoaded && mapRef.current && !mapInstance.current && window.L) {
+    if (mapLoaded && mapRef.current && window.L) {
+      // Alte Karte cleanup falls vorhanden
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
       initializeMap();
     }
   }, [mapLoaded]);
+
+  // Cleanup beim Unmount
+  useEffect(() => {
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+      markersRef.current = [];
+    };
+  }, []);
 
   // Marker aktualisieren wenn sich Mineralien ändern
   useEffect(() => {
@@ -279,16 +295,28 @@ export default function MapPage({
   return (
     <>
       <section className="page active">
-        <div className="container" style={{ height: '100vh', padding: 0 }}>
+        <div className="container" style={{ height: '100vh', padding: 0, position: 'relative' }}>
+          <div 
+            ref={mapRef} 
+            style={{ 
+              width: '100%', 
+              height: '100vh',
+              borderRadius: '0'
+            }}
+          />
+          
+          {/* Info-Overlay - jetzt weiter unten positioniert */}
           <div style={{ 
             position: 'absolute', 
-            top: '20px', 
+            bottom: '20px', 
             left: '20px', 
             zIndex: 1000, 
-            background: 'white', 
+            background: 'rgba(255, 255, 255, 0.95)', 
             padding: '15px', 
             borderRadius: '8px', 
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)' 
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            maxWidth: '300px',
+            backdropFilter: 'blur(5px)'
           }}>
             <h2 style={{ margin: '0 0 10px 0', fontSize: '18px' }}>Fundorte der Mineralien</h2>
             <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
@@ -299,15 +327,6 @@ export default function MapPage({
             </p>
           </div>
           
-          <div 
-            ref={mapRef} 
-            style={{ 
-              width: '100%', 
-              height: '100vh',
-              borderRadius: '0'
-            }}
-          />
-          
           {!mapLoaded && (
             <div style={{
               position: 'absolute',
@@ -315,7 +334,11 @@ export default function MapPage({
               left: '50%',
               transform: 'translate(-50%, -50%)',
               textAlign: 'center',
-              zIndex: 1001
+              zIndex: 1001,
+              background: 'rgba(255, 255, 255, 0.9)',
+              padding: '20px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
             }}>
               <div className="loading">OpenStreetMap wird geladen...</div>
             </div>
